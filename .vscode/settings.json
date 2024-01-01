@@ -1,0 +1,37 @@
+{
+  "python.languageServer": "Pylance",
+  "python.analysis.typeCheckingMode": "basic",
+  "[json]": {
+    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.formatOnSave": true,
+    "editor.indentSize": 2
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "vscode.json-language-features",
+    "editor.formatOnSave": true,
+    "editor.indentSize": 2
+  },
+  "[python]": {
+    "editor.defaultFormatter": "ms-python.black-formatter",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.organizeImports": "explicit"
+    }
+  },
+  "cSpell.words": [
+    "aiohttp",
+    "asyncio",
+    "docloader",
+    "documentloader",
+    "fedikit",
+    "isort",
+    "jsonld",
+    "langcodes",
+    "langstr",
+    "mypy",
+    "pyld",
+    "pyproject",
+    "pytest",
+    "refurb"
+  ]
+}

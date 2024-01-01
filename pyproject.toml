@@ -1,0 +1,76 @@
+[project]
+name = "FediKit"
+description = "A Pythonic interface to the Fediverse"
+# readme = "README.rst"
+keywords = ["activitypub", "fediverse", "social media", "federation"]
+classifiers = [
+  "Development Status :: 1 - Planning",
+  "Environment :: Web Environment",
+  "Intended Audience :: Developers",
+  "License :: Other/Proprietary License",
+  "Operating System :: MacOS :: MacOS X",
+  "Operating System :: Microsoft :: Windows",
+  "Operating System :: POSIX",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Topic :: Communications",
+  "Topic :: Internet :: WWW/HTTP :: Dynamic Content",
+  "Topic :: Internet :: WWW/HTTP :: WSGI :: Application",
+  "Topic :: Internet :: WWW/HTTP :: WSGI :: Middleware",
+  "Topic :: Software Development :: Libraries",
+  "Topic :: Software Development :: Libraries :: Application Frameworks",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+  "Typing :: Typed",
+]
+authors = [
+  { name = "Hong Minhee (洪 民憙)", email = "hong@minhee.org" },
+]
+license = { file = "LICENSE" }
+requires-python = ">= 3.12"
+dynamic = ["version"]
+
+dependencies = [
+  "langcodes ~= 3.3.0",
+  "PyLD[requests] ~= 2.0.3",
+]
+
+[project.optional-dependencies]
+dev = [
+  "mypy ~= 1.8.0",
+  "pytest ~= 7.4.3",
+  "pytest-asyncio ~= 0.23.2",
+  "pytest-mypy ~= 0.10.3",
+]
+
+[build-system]
+requires = ["flit-core >= 3.9, < 4"]
+build-backend = "flit_core.buildapi"
+
+[tool.black]
+line-length = 79
+target-version = ["py312"]
+preview = true
+
+[tool.flake8]
+max-line-length = 79
+
+[tool.isort]
+profile = "black"
+line_length = 79
+
+[tool.mypy]
+strict = true
+files = ["fedikit", "tests"]
+scripts_are_modules = true
+
+[[tool.mypy.overrides]]
+module = ["pyld.*"]
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = ["tests.*"]
+disallow_untyped_defs = false
+
+[tool.pytest.ini_options]
+addopts = "--mypy"
