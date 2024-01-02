@@ -2,7 +2,7 @@ import typing
 from abc import ABC, abstractmethod, abstractproperty
 from collections.abc import Sequence
 from types import GenericAlias, UnionType
-from typing import Any, Self
+from typing import Any, NewType, Self
 
 from .converters import from_jsonld
 
@@ -122,6 +122,8 @@ class PluralProperty(ResourceProperty):
             and element_type.__origin__ is UnionType
         ):
             element_types = element_type.__args__
+        elif isinstance(element_type, NewType):
+            element_types = (element_type.__supertype__,)
         elif isinstance(element_type, type):
             element_types = (element_type,)
         else:
@@ -167,6 +169,8 @@ class SingularProperty(ResourceProperty):
             and type_.__origin__ is UnionType
         ):
             types = type_.__args__
+        elif isinstance(type_, NewType):
+            types = (type_.__supertype__,)
         elif isinstance(type_, type):
             types = (type_,)
         else:

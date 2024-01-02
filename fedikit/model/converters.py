@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Mapping, Optional, TypeVar
+from typing import Any, Mapping, NewType, Optional, TypeVar
 
 from .docloader import DocumentLoader
 
@@ -53,6 +53,8 @@ async def from_jsonld(cls: type[T], document: Mapping[str, Any]) -> T:
     :raises ValueError: If the given document cannot be converted to the
         given class.
     """
+    if isinstance(cls, NewType):
+        cls = cls.__supertype__
     if hasattr(cls, "__from_jsonld__"):
         instance = cls.__from_jsonld__(document)  # type: ignore
         return (  # type: ignore

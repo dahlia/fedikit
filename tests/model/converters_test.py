@@ -3,6 +3,7 @@ from datetime import UTC, datetime
 import pytest
 
 from fedikit.model.converters import from_jsonld, jsonld
+from fedikit.model.entity import Uri
 
 
 @pytest.mark.asyncio
@@ -33,6 +34,13 @@ async def test_datetime_jsonld():
     assert await jsonld(datetime(2024, 1, 2, 3, 4, 5, 6, UTC)) == {
         "@type": "http://www.w3.org/2001/XMLSchema#dateTime",
         "@value": "2024-01-02T03:04:05.000006+00:00",
+    }
+
+
+@pytest.mark.asyncio
+async def test_uri_jsonld():
+    assert await jsonld(Uri("https://example.com/")) == {
+        "@value": "https://example.com/"
     }
 
 
@@ -80,3 +88,10 @@ async def test_datetime_from_jsonld():
             "@value": "2024-01-02T03:04:05.000006+00:00",
         },
     ) == datetime(2024, 1, 2, 3, 4, 5, 6, UTC)
+
+
+@pytest.mark.asyncio
+async def test_uri_from_jsonld():
+    assert await from_jsonld(Uri, {"@value": "https://example.com/"}) == Uri(
+        "https://example.com/"
+    )

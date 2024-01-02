@@ -5,6 +5,8 @@ from fedikit.model.langstr import LanguageString
 from ..model.descriptors import id_property, plural_property, singular_property
 from ..model.entity import Entity, Uri
 
+__all__ = ["Object"]
+
 
 class Object(Entity):
     """Describes an object of any kind.  The ``Object`` type serves as the base
