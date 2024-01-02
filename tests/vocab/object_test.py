@@ -4,6 +4,7 @@ from fedikit.model.converters import from_jsonld, jsonld
 from fedikit.model.docloader import DocumentLoader
 from fedikit.model.entity import Uri
 from fedikit.model.langstr import LanguageString
+from fedikit.vocab.link import Link
 from fedikit.vocab.object import Object
 
 
@@ -15,9 +16,82 @@ async def test_object_from_jsonld() -> None:
             "@context": "https://www.w3.org/ns/activitystreams",
             "type": "Object",
             "name": "foo",
+            "attachment": [
+                {"type": "Object", "name": "foo"},
+                {"type": "Link", "as:href": "https://example.com/"},
+            ],
         },
     )
-    assert parsed == Object(name="foo")
+    assert parsed == Object(
+        name="foo",
+        attachments=[
+            Object(name="foo"),
+            Link(href=Uri("https://example.com/")),
+        ],
+    )
+
+
+@pytest.mark.asyncio
+async def test_object_attachment(document_loader: DocumentLoader) -> None:
+    obj = Object(attachment=Object(name="foo"))
+    assert obj.attachment == Object(name="foo")
+    assert obj.attachments == [Object(name="foo")]
+    assert await jsonld(obj, expand=True, loader=document_loader) == {
+        "@type": ["https://www.w3.org/ns/activitystreams#Object"],
+        "https://www.w3.org/ns/activitystreams#attachment": [
+            {
+                "@type": ["https://www.w3.org/ns/activitystreams#Object"],
+                "https://www.w3.org/ns/activitystreams#name": [
+                    {"@value": "foo"}
+                ],
+            },
+        ],
+    }
+    assert await jsonld(obj, loader=document_loader) == {
+        "@context": "https://www.w3.org/ns/activitystreams",
+        "type": "Object",
+        "attachment": {"type": "Object", "name": "foo"},
+    }
+
+
+@pytest.mark.asyncio
+async def test_object_attachments(document_loader: DocumentLoader) -> None:
+    obj = Object(
+        attachments=[
+            Object(name="foo"),
+            Link(href=Uri("https://example.com/")),
+        ]
+    )
+    assert obj.attachment == Object(name="foo")
+    assert obj.attachments == [
+        Object(name="foo"),
+        Link(href=Uri("https://example.com/")),
+    ]
+    assert await jsonld(obj, expand=True, loader=document_loader) == {
+        "@type": ["https://www.w3.org/ns/activitystreams#Object"],
+        "https://www.w3.org/ns/activitystreams#attachment": [
+            {
+                "@type": ["https://www.w3.org/ns/activitystreams#Object"],
+                "https://www.w3.org/ns/activitystreams#name": [
+                    {"@value": "foo"}
+                ],
+            },
+            {
+                "@type": ["https://www.w3.org/ns/activitystreams#Link"],
+                "https://www.w3.org/ns/activitystreams#href": [
+                    {"@value": "https://example.com/"},
+                ],
+            },
+        ],
+    }
+    assert await jsonld(obj, loader=document_loader) == {
+        "@context": "https://www.w3.org/ns/activitystreams",
+        "type": "Object",
+        "attachment": [
+            {"type": "Object", "name": "foo"},
+            {"type": "Link", "as:href": "https://example.com/"},
+        ],
+    }
 
 
 @pytest.mark.asyncio

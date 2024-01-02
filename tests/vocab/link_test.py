@@ -5,6 +5,7 @@ from fedikit.model.converters import from_jsonld, jsonld
 from fedikit.model.docloader import DocumentLoader
 from fedikit.model.entity import Uri
 from fedikit.vocab.link import Link
+from fedikit.vocab.object import Object
 
 
 @pytest.mark.asyncio
@@ -18,6 +19,10 @@ async def test_object_from_jsonld() -> None:
             "hreflang": "en",
             "width": 200,
             "height": 150,
+            "preview": [
+                {"type": "Object", "name": "foo"},
+                {"type": "Link", "as:href": "https://example.com/preview"},
+            ],
         },
     )
     assert parsed == Link(
@@ -25,6 +30,10 @@ async def test_object_from_jsonld() -> None:
         hreflang=Language.get("en"),
         width=200,
         height=150,
+        previews=[
+            Object(name="foo"),
+            Link(href=Uri("https://example.com/preview")),
+        ],
     )
 
 

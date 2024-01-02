@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from typing import Union
 
 from langcodes import Language
 
@@ -86,3 +87,16 @@ class Link(Entity):
     width: int = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#width")
     )
+
+    #: Identifies an entity that provides a preview of this object.
+    preview: Union["Link", "Object"] = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#preview")
+    )
+
+    #: Plural accessor for :attr:`preview`.
+    previews: Sequence[Union["Link", "Object"]] = plural_property(
+        Uri("https://www.w3.org/ns/activitystreams#preview")
+    )
+
+
+from .object import Object  # noqa: E402

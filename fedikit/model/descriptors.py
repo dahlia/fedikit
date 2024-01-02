@@ -1,8 +1,10 @@
 import typing
 from abc import ABC, abstractmethod, abstractproperty
 from collections.abc import Sequence
+from importlib import import_module
+from inspect import currentframe
 from types import GenericAlias, UnionType
-from typing import Any, NewType, Self
+from typing import Any, ForwardRef, NewType, Optional, Self
 
 from .converters import from_jsonld
 
@@ -75,10 +77,24 @@ class IdProperty(Property):
 
 
 class ResourceProperty(Property):
+    class_def_site: Optional[str]
     _uri: "Uri"
 
     def __init__(self, uri: "Uri"):
         self._uri = uri
+        current_frame = currentframe()
+        if current_frame is None:
+            self.class_def_site = None
+        else:
+            current_filename = current_frame.f_code.co_filename
+            while (
+                current_frame is not None
+                and current_frame.f_code.co_filename == current_filename
+            ):
+                current_frame = current_frame.f_back
+            self.class_def_site = (
+                current_frame and current_frame.f_globals.get("__name__")
+            )
 
     @property
     def uri(self) -> "Uri":
@@ -116,17 +132,28 @@ class PluralProperty(ResourceProperty):
             raise TypeError(f"expected Sequence[T], got {type_!r}")
         element_type = type_.__args__[0]
         if isinstance(element_type, UnionType):
-            element_types = element_type.__args__
+            element_types = list(element_type.__args__)
         elif (
             isinstance(element_type, typing._GenericAlias)  # type: ignore
-            and element_type.__origin__ is UnionType
+            and element_type.__origin__ is typing.Union
         ):
-            element_types = element_type.__args__
+            element_types = list(element_type.__args__)
         elif isinstance(element_type, NewType):
-            element_types = (element_type.__supertype__,)
-        elif isinstance(element_type, type):
-            element_types = (element_type,)
+            element_types = [element_type.__supertype__]
         else:
+            element_types = [element_type]
+        for i, et in enumerate(element_types):
+            if isinstance(et, (str, ForwardRef)):
+                et_name = et if isinstance(et, str) else et.__forward_arg__
+                et = self.class_def_site and getattr(
+                    import_module(self.class_def_site), et_name, None
+                )
+                if et is None or not isinstance(et, type):
+                    raise ReferenceError(
+                        f"failed to resolve deferred type name {et_name!r}"
+                    )
+                element_types[i] = et
+        if not all(isinstance(et, type) for et in element_types):
             raise TypeError(
                 f"expected Sequence[T] where T is a class, got {type_!r}"
             )
@@ -163,25 +190,36 @@ class SingularProperty(ResourceProperty):
 
     async def parse_jsonld(self, type_: Any, value: Any) -> Any:
         if isinstance(type_, UnionType):
-            types = type_.__args__
+            types = list(type_.__args__)
         elif (
             isinstance(type_, typing._GenericAlias)  # type: ignore
-            and type_.__origin__ is UnionType
+            and type_.__origin__ is typing.Union
         ):
-            types = type_.__args__
+            types = list(type_.__args__)
         elif isinstance(type_, NewType):
-            types = (type_.__supertype__,)
-        elif isinstance(type_, type):
-            types = (type_,)
+            types = [type_.__supertype__]
         else:
+            types = [type_]
+        for i, t in enumerate(types):
+            if isinstance(t, (str, ForwardRef)):
+                t_name = t if isinstance(t, str) else t.__forward_arg__
+                t = self.class_def_site and getattr(
+                    import_module(self.class_def_site), t_name, None
+                )
+                if t is None or not isinstance(t, type):
+                    raise ReferenceError(
+                        f"failed to resolve deferred type name {t_name!r}"
+                    )
+                types[i] = t
+        if not all(isinstance(et, type) for et in types):
             raise TypeError(
                 "expected T or Union[T, ...] where T is a class, got"
                 f" {type_!r}"
             )
         for v in value:
-            for et in types:
+            for t in types:
                 try:
-                    return await from_jsonld(et, v)
+                    return await from_jsonld(t, v)
                 except ValueError:
                     continue
         raise ValueError(f"cannot convert {value!r} to {type_.__name__}")

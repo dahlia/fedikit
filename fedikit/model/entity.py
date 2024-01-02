@@ -15,7 +15,7 @@ from pyld import jsonld
 from pyld.documentloader.requests import requests_document_loader
 
 from .converters import jsonld as to_jsonld
-from .descriptors import Property
+from .descriptors import Property, SingularProperty
 from .docloader import DocumentLoader
 
 __all__ = ["Entity", "Slot", "Uri"]
@@ -78,7 +78,10 @@ class Entity:
         )
         for uri, vals in doc.items():
             desc_dict = descriptors.get(Uri(uri), {})
-            for name, desc in desc_dict.items():
+            desc_kvs = list(desc_dict.items())
+            # Give priority to plural properties over singular ones:
+            desc_kvs.sort(key=lambda kv: isinstance(kv[1], SingularProperty))
+            for name, desc in desc_kvs:
                 try:
                     values[name] = await desc.parse_jsonld(
                         cls.__annotations__[name], vals
