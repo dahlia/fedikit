@@ -46,7 +46,7 @@ class Entity:
     __default_context__: ClassVar[Uri | Sequence[Uri] | Mapping[str, Any]]
 
     _values: Mapping[Uri, Slot]
-    _extra: Mapping[Uri, Any]
+    __extra__: Mapping[Uri, Any]
 
     @classmethod
     async def __from_jsonld__(
@@ -90,11 +90,15 @@ class Entity:
             else:
                 if uri != "@type":
                     extra[Uri(uri)] = vals
-        instance = cls(**values)
-        instance._extra = extra
+        instance = cls(**values, __extra__=extra)
         return instance
 
-    def __init__(self, **kwargs: Mapping[str, Any]) -> None:
+    def __init__(
+        self,
+        *,
+        __extra__: Mapping[Uri, Any] = {},  # noqa: B006
+        **kwargs: Mapping[str, Any],
+    ) -> None:
         values: dict[Uri, Slot] = {}
         props: dict[Uri, str] = {}
         cls = type(self)
@@ -112,13 +116,15 @@ class Entity:
             values[desc.uri] = desc.normalize(value)
             props[desc.uri] = key
         self._values = values
-        self._extra = {}
+        self.__extra__ = dict(__extra__)
 
     def __eq__(self, other: object) -> bool:
         if type(self) is not type(other):
             return False
         assert isinstance(other, Entity)
-        return self._values == other._values and self._extra == other._extra
+        return (
+            self._values == other._values and self.__extra__ == other.__extra__
+        )
 
     def __ne__(self, other: object) -> bool:
         return not (self == other)
@@ -135,7 +141,7 @@ class Entity:
             for slot_type, value in slot:
                 hv = (37 * hv & 0xFFFFFFFF) + hash(slot_type) & 0xFFFFFFFF
                 hv = (37 * hv & 0xFFFFFFFF) + hash(value) & 0xFFFFFFFF
-        extra = list(self._extra.items())
+        extra = list(self.__extra__.items())
         extra.sort(key=lambda kv: kv[0])
         for uri, value in extra:
             hv = (37 * hv & 0xFFFFFFFF) + hash(uri) & 0xFFFFFFFF
@@ -153,7 +159,7 @@ class Entity:
             doc[uri] = [
                 await to_jsonld(v, expand=True, loader=loader) for _, v in slot
             ]
-        for uri, value in self._extra.items():
+        for uri, value in self.__extra__.items():
             doc[uri] = value
         doc_loader = get_raw_document_loader(loader)
         if expand:
@@ -181,6 +187,8 @@ class Entity:
                 if prop.check_slot(values):
                     value_map[name] = getattr(self, name)
                     break
+        if self.__extra__:
+            value_map["__extra__"] = self.__extra__
         args = ", ".join(f"{k}={v!r}" for (k, v) in value_map.items())
         return f"{cls.__name__}({args})"
 

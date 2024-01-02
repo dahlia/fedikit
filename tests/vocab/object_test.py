@@ -119,3 +119,15 @@ def test_object_inequality(a: Object, b: Object) -> None:
 def test_object_repr():
     assert repr(Object(name="foo")) == "Object(name='foo')"
     assert repr(Object(names=["foo", "bar"])) == "Object(names=['foo', 'bar'])"
+    assert (
+        repr(
+            Object(
+                names=["foo", "bar"],
+                __extra__={  # type: ignore
+                    "https://example.com/": {"@value": "foo"},
+                },
+            )
+        )
+        == "Object(names=['foo', 'bar'], "
+        "__extra__={'https://example.com/': {'@value': 'foo'}})"
+    )
