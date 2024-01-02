@@ -1,6 +1,7 @@
 from datetime import UTC, datetime
 
 import pytest
+from langcodes import Language
 
 from fedikit.model.converters import from_jsonld, jsonld
 from fedikit.model.entity import Uri
@@ -42,6 +43,11 @@ async def test_uri_jsonld():
     assert await jsonld(Uri("https://example.com/")) == {
         "@value": "https://example.com/"
     }
+
+
+@pytest.mark.asyncio
+async def test_language_jsonld():
+    assert await jsonld(Language.get("KO-KR")) == {"@value": "ko-KR"}
 
 
 @pytest.mark.asyncio
@@ -94,4 +100,11 @@ async def test_datetime_from_jsonld():
 async def test_uri_from_jsonld():
     assert await from_jsonld(Uri, {"@value": "https://example.com/"}) == Uri(
         "https://example.com/"
+    )
+
+
+@pytest.mark.asyncio
+async def test_language_from_jsonld():
+    assert await from_jsonld(Language, {"@value": "ko-KR"}) == Language.get(
+        "ko-KR"
     )

@@ -1,5 +1,7 @@
 from collections.abc import Sequence
 
+from langcodes import Language
+
 from ..model.descriptors import id_property, plural_property, singular_property
 from ..model.entity import Entity, Uri
 from ..model.langstr import LanguageString
@@ -31,6 +33,28 @@ class Link(Entity):
         Uri("https://www.w3.org/ns/activitystreams#href")
     )
 
+    #: A link relation associated with a :class:`Link`. The value *must*
+    #: conform to both the HTML5_ and :rfc:`5988` "link relation" definitions.
+    #:
+    #: In the HTML5_, any string not containing the "space" U+0020, "tab"
+    #: (U+0009), "LF" (U+000A), "FF" (U+000C), "CR" (U+000D) or "," (U+002C)
+    #: characters can be used as a valid link relation.
+    #:
+    #: .. _HTML5: https://www.w3.org/TR/html5/
+    rel: str = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#rel")
+    )
+
+    #: Plural accessor for :attr:`rel`.
+    rels: Sequence[str] = plural_property(
+        Uri("https://www.w3.org/ns/activitystreams#rel")
+    )
+
+    #: Identifies the MIME media type of the referenced resource.
+    media_type: str = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#mediaType")
+    )
+
     #: A simple, human-readable, plain-text name for the object.
     #: HTML markup *must not* be included.
     #: The name *may* be expressed using multiple language-tagged values.
@@ -38,9 +62,15 @@ class Link(Entity):
         Uri("https://www.w3.org/ns/activitystreams#name")
     )
 
-    #: Simple, human-readable, plain-text names for the object.
-    #: HTML markup *must not* be included.
-    #: The names *may* be expressed using multiple language-tagged values.
+    #: Plural accessor for :attr:`name`.
     names: Sequence[str | LanguageString] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#name")
+    )
+
+    #: Hints as to the language used by the target resource.  Value *must* be a
+    #: BCP47_ Language-Tag.
+    #:
+    #: .. _BCP47: https://tools.ietf.org/html/bcp47
+    hreflang: Language = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#hreflang")
     )

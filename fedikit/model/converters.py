@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import Any, Mapping, NewType, Optional, TypeVar
 
+from langcodes import Language
+
 from .docloader import DocumentLoader
 
 __all__ = ["from_jsonld", "jsonld"]
@@ -38,6 +40,8 @@ async def jsonld(
                 "@type": "http://www.w3.org/2001/XMLSchema#dateTime",
                 "@value": value.isoformat(),
             }
+        case Language():
+            return {"@value": str(value)}
     raise TypeError(f"cannot convert {type(value).__name__} to JSON-LD")
 
 
@@ -66,4 +70,6 @@ async def from_jsonld(cls: type[T], document: Mapping[str, Any]) -> T:
         return cls(document["@value"])  # type: ignore
     elif issubclass(cls, datetime):
         return cls.fromisoformat(document["@value"])  # type: ignore
+    elif issubclass(cls, Language):
+        return Language.get(document["@value"])  # type: ignore
     raise ValueError(f"cannot convert JSON-LD to {cls.__name__}")

@@ -33,6 +33,7 @@
     "pyld",
     "pyproject",
     "pytest",
-    "refurb"
+    "refurb",
+    "rels"
   ]
 }

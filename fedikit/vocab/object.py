@@ -29,9 +29,7 @@ class Object(Entity):
         Uri("https://www.w3.org/ns/activitystreams#name")
     )
 
-    #: Simple, human-readable, plain-text names for the object.
-    #: HTML markup *must not* be included.
-    #: The names *may* be expressed using multiple language-tagged values.
+    #: Plural accessor for :attr:`name`.
     names: Sequence[str | LanguageString] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#name")
     )
