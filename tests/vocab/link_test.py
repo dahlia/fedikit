@@ -16,10 +16,15 @@ async def test_object_from_jsonld() -> None:
             "type": "Link",
             "as:href": "https://example.com/",
             "hreflang": "en",
+            "width": 200,
+            "height": 150,
         },
     )
     assert parsed == Link(
-        href=Uri("https://example.com/"), hreflang=Language.get("en")
+        href=Uri("https://example.com/"),
+        hreflang=Language.get("en"),
+        width=200,
+        height=150,
     )
 
 
@@ -58,4 +63,37 @@ async def test_link_hreflang(document_loader: DocumentLoader) -> None:
         "type": "Link",
         "as:href": "https://example.com/",
         "hreflang": "en",
+    }
+
+
+@pytest.mark.asyncio
+async def test_link_width_height(document_loader: DocumentLoader) -> None:
+    link = Link(href=Uri("https://example.com/a.png"), width=200, height=150)
+    assert link.href == Uri("https://example.com/a.png")
+    assert link.width == 200
+    assert link.height == 150
+    assert await jsonld(link, expand=True, loader=document_loader) == {
+        "@type": ["https://www.w3.org/ns/activitystreams#Link"],
+        "https://www.w3.org/ns/activitystreams#href": [
+            {"@value": "https://example.com/a.png"},
+        ],
+        "https://www.w3.org/ns/activitystreams#width": [
+            {
+                "@type": "http://www.w3.org/2001/XMLSchema#nonNegativeInteger",
+                "@value": 200,
+            },
+        ],
+        "https://www.w3.org/ns/activitystreams#height": [
+            {
+                "@type": "http://www.w3.org/2001/XMLSchema#nonNegativeInteger",
+                "@value": 150,
+            },
+        ],
+    }
+    assert await jsonld(link, loader=document_loader) == {
+        "@context": "https://www.w3.org/ns/activitystreams",
+        "type": "Link",
+        "as:href": "https://example.com/a.png",
+        "width": 200,
+        "height": 150,
     }

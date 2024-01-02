@@ -74,3 +74,15 @@ class Link(Entity):
     hreflang: Language = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#hreflang")
     )
+
+    #: On a :class:`Link`, specifies a hint as to the rendering height in
+    #: device-independent pixels of the linked resource.
+    height: int = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#height")
+    )
+
+    #: On a :class:`Link`, specifies a hint as to the rendering width in
+    #: device-independent pixels of the linked resource.
+    width: int = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#width")
+    )
