@@ -7,7 +7,7 @@ classifiers = [
   "Development Status :: 1 - Planning",
   "Environment :: Web Environment",
   "Intended Audience :: Developers",
-  "License :: Other/Proprietary License",
+  "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
   "Operating System :: MacOS :: MacOS X",
   "Operating System :: Microsoft :: Windows",
   "Operating System :: POSIX",
