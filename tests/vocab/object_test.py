@@ -2,7 +2,7 @@ import pytest
 
 from fedikit.model.converters import from_jsonld, jsonld
 from fedikit.model.docloader import DocumentLoader
-from fedikit.model.entity import Uri
+from fedikit.model.entity import EntityRef, Uri
 from fedikit.model.langstr import LanguageString
 from fedikit.vocab.link import Link
 from fedikit.vocab.object import Object
@@ -29,6 +29,22 @@ async def test_object_from_jsonld() -> None:
             Link(href=Uri("https://example.com/")),
         ],
     )
+
+    parsed2 = await from_jsonld(
+        Object,
+        {
+            "@context": "https://www.w3.org/ns/activitystreams",
+            "type": "Object",
+            "name": "foo",
+            "attachment": [
+                "https://example.com/foo",
+                {"type": "Link", "as:href": "https://example.com/"},
+            ],
+        },
+    )
+    assert isinstance(parsed2, Object)
+    assert parsed2.name == "foo"
+    assert parsed2.attachments == [Link(href=Uri("https://example.com/"))]
 
 
 @pytest.mark.asyncio
@@ -193,6 +209,19 @@ def test_object_inequality(a: Object, b: Object) -> None:
 def test_object_repr():
     assert repr(Object(name="foo")) == "Object(name='foo')"
     assert repr(Object(names=["foo", "bar"])) == "Object(names=['foo', 'bar'])"
+    assert (
+        repr(
+            Object(
+                names=["foo", "bar"],
+                attachments=[
+                    EntityRef("https://example.com/"),  # type: ignore
+                    Object(name="baz"),
+                ],
+            )
+        )
+        == "Object(names=['foo', 'bar'], "
+        "attachments=[EntityRef('https://example.com/'), Object(name='baz')])"
+    )
     assert (
         repr(
             Object(

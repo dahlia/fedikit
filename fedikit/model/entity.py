@@ -3,11 +3,12 @@ from collections.abc import Mapping, Sequence
 from typing import (
     Any,
     ClassVar,
-    Literal,
     NewType,
     Optional,
     Self,
     TypeAlias,
+    Union,
+    cast,
     dataclass_transform,
     get_type_hints,
 )
@@ -18,16 +19,15 @@ from pyld.documentloader.requests import requests_document_loader
 from .converters import jsonld as to_jsonld
 from .descriptors import Property, SingularProperty
 from .docloader import DocumentLoader
+from .scalars import ScalarValue
 
-__all__ = ["Entity", "Slot", "Uri"]
+__all__ = ["Entity", "EntityRef", "Slot", "Uri"]
 
 
 Uri = NewType("Uri", str)
 
 
-Slot: TypeAlias = (
-    Uri | Sequence[tuple[Literal["id"], Uri] | tuple[Literal["resource"], Any]]
-)
+Slot: TypeAlias = Uri | Sequence[Union["EntityRef", ScalarValue, "Entity"]]
 
 
 @dataclass_transform(frozen_default=True, kw_only_default=True)
@@ -143,8 +143,7 @@ class Entity:
             if isinstance(slot, str):
                 hv = (37 * hv & 0xFFFFFFFF) + hash(slot) & 0xFFFFFFFF
                 continue
-            for slot_type, value in slot:
-                hv = (37 * hv & 0xFFFFFFFF) + hash(slot_type) & 0xFFFFFFFF
+            for value in slot:
                 hv = (37 * hv & 0xFFFFFFFF) + hash(value) & 0xFFFFFFFF
         extra = list(self.__extra__.items())
         extra.sort(key=lambda kv: kv[0])
@@ -162,7 +161,12 @@ class Entity:
                 doc[uri] = slot
                 continue
             doc[uri] = [
-                await to_jsonld(v, expand=True, loader=loader) for _, v in slot
+                (
+                    {"@id": v}
+                    if isinstance(v, EntityRef)
+                    else await to_jsonld(v, expand=True, loader=loader)
+                )
+                for v in slot
             ]
         for uri, value in self.__extra__.items():
             doc[uri] = value
@@ -188,9 +192,9 @@ class Entity:
         value_map = {}
         for uri, values in self._values.items():
             props = uri_props.get(uri, {})
-            for name, prop in props.items():
-                if prop.check_slot(values):
-                    value_map[name] = getattr(self, name)
+            for name, descriptor in props.items():
+                if descriptor.check_slot(values):
+                    value_map[name] = descriptor.repr_value(values)
                     break
         if self.__extra__:
             value_map["__extra__"] = self.__extra__
@@ -253,3 +257,27 @@ def get_raw_document_loader(loader: Optional[DocumentLoader] = None) -> Any:
         }
 
     return doc_loader
+
+
+class EntityRef:
+    """A reference to an :class:`Entity`.  It is used to represent references
+    to entities in other entities, which are not loaded yet.
+    """
+
+    #: The URI of the entity.
+    uri: Uri
+
+    def __init__(self, uri: Uri | str) -> None:
+        self.uri = cast(Uri, uri)
+
+    def __eq__(self, other: object) -> bool:
+        return isinstance(other, EntityRef) and self.uri == other.uri
+
+    def __ne__(self, other: object) -> bool:
+        return not (self == other)
+
+    def __hash__(self) -> int:
+        return hash(self.uri)
+
+    def __repr__(self) -> str:
+        return f"{type(self).__name__}({self.uri!r})"

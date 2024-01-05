@@ -4,12 +4,13 @@ from collections.abc import Sequence
 from importlib import import_module
 from inspect import currentframe
 from types import GenericAlias, UnionType
-from typing import Any, ForwardRef, NewType, Optional, Self
+from typing import Any, ForwardRef, NewType, Optional, Self, Union
 
 from .converters import from_jsonld
 
 if typing.TYPE_CHECKING:
-    from .entity import Entity, Slot, Uri
+    from .entity import Entity, EntityRef, Slot, Uri
+    from .scalars import ScalarValue
 
 __all__ = [
     "IdProperty",
@@ -31,20 +32,25 @@ class Property(ABC):
     @abstractmethod
     def __get__(
         self, instance: Any | None, cls: type["Entity"]
-    ) -> Self | Any | Sequence[Any]:
-        raise NotImplementedError
+    ) -> Self | Any | Sequence[Any]: ...
 
     @abstractmethod
-    def normalize(self, value: Any) -> "Slot":
-        raise NotImplementedError
+    def normalize(self, value: Any) -> "Slot": ...
 
     @abstractmethod
-    def check_slot(self, slot: "Slot") -> bool:
-        raise NotImplementedError
+    def check_slot(self, slot: "Slot") -> bool: ...
+
+    def repr_value(self, slot: "Slot") -> Any:
+        return slot
 
     @abstractmethod
-    async def parse_jsonld(self, type_: Any, value: Any) -> Any:
-        raise NotImplementedError
+    async def parse_jsonld(self, type_: Any, value: Any) -> Union[
+        "Uri",
+        "EntityRef",
+        "ScalarValue",
+        "Entity",
+        Sequence[Union["EntityRef", "ScalarValue", "Entity"]],
+    ]: ...
 
 
 class IdProperty(Property):
@@ -70,7 +76,13 @@ class IdProperty(Property):
     def check_slot(self, slot: "Slot") -> bool:
         return isinstance(slot, str)
 
-    async def parse_jsonld(self, type_: Any, value: Any) -> Any:
+    async def parse_jsonld(self, type_: Any, value: Any) -> Union[
+        "Uri",
+        "EntityRef",
+        "ScalarValue",
+        "Entity",
+        Sequence[Union["EntityRef", "ScalarValue", "Entity"]],
+    ]:
         if type_ is not Uri:
             raise TypeError(f"expected Uri, got {type_.__name__}")
         return Uri(value)
@@ -107,21 +119,27 @@ class PluralProperty(ResourceProperty):
     ) -> Self | Sequence[Any]:
         if instance is None:
             return self
-        values = []
-        for slot_type, value in instance._values[self.uri]:
-            assert (
-                slot_type == "resource"
-            ), f"expected 'resource', got {slot_type!r}"
-            values.append(value)
-        return values
+        from .entity import EntityRef
+
+        return [
+            v
+            for v in instance._values[self.uri]
+            if not isinstance(v, EntityRef)
+        ]
 
     def normalize(self, value: Any) -> "Slot":
-        return [("resource", v) for v in value]
+        return [v for v in value]
 
     def check_slot(self, slot: "Slot") -> bool:
         return not isinstance(slot, str) and len(slot) != 1
 
-    async def parse_jsonld(self, type_: Any, value: Any) -> Any:
+    async def parse_jsonld(self, type_: Any, value: Any) -> Union[
+        "Uri",
+        "EntityRef",
+        "ScalarValue",
+        "Entity",
+        Sequence[Union["EntityRef", "ScalarValue", "Entity"]],
+    ]:
         if not (
             isinstance(
                 type_,
@@ -135,7 +153,7 @@ class PluralProperty(ResourceProperty):
             element_types = list(element_type.__args__)
         elif (
             isinstance(element_type, typing._GenericAlias)  # type: ignore
-            and element_type.__origin__ is typing.Union
+            and element_type.__origin__ is Union
         ):
             element_types = list(element_type.__args__)
         elif isinstance(element_type, NewType):
@@ -159,9 +177,14 @@ class PluralProperty(ResourceProperty):
             )
         parsed = []
         for v in value:
+            if len(v) == 1 and "@id" in v:
+                from .entity import EntityRef
+
+                parsed.append(EntityRef(v["@id"]))
+                continue
             for et in element_types:
                 try:
-                    parsed.append(await from_jsonld(et, v))
+                    parsed.append(await from_jsonld(et, v))  # pyright: ignore
                 except ValueError:
                     continue
                 else:
@@ -173,27 +196,35 @@ class SingularProperty(ResourceProperty):
     def __get__(self, instance: Any | None, cls: type["Entity"]) -> Self | Any:
         if instance is None:
             return self
+        from .entity import EntityRef
+
         values = instance._values[self.uri]
-        if values:
-            slot = values[0]
-            assert (
-                slot[0] == "resource"
-            ), f"expected 'resource', got {slot[0]!r}"
-            return slot[1]
+        for v in values:
+            if not isinstance(v, EntityRef):
+                return v
         return None
 
     def normalize(self, value: Any) -> "Slot":
-        return [("resource", value)]
+        return [(value)]
 
     def check_slot(self, slot: "Slot") -> bool:
         return not isinstance(slot, str) and len(slot) == 1
 
-    async def parse_jsonld(self, type_: Any, value: Any) -> Any:
+    def repr_value(self, slot: "Slot") -> Any:
+        return slot[0]
+
+    async def parse_jsonld(self, type_: Any, value: Any) -> Union[
+        "Uri",
+        "EntityRef",
+        "ScalarValue",
+        "Entity",
+        Sequence[Union["EntityRef", "ScalarValue", "Entity"]],
+    ]:
         if isinstance(type_, UnionType):
             types = list(type_.__args__)
         elif (
             isinstance(type_, typing._GenericAlias)  # type: ignore
-            and type_.__origin__ is typing.Union
+            and type_.__origin__ is Union
         ):
             types = list(type_.__args__)
         elif isinstance(type_, NewType):
@@ -217,9 +248,13 @@ class SingularProperty(ResourceProperty):
                 f" {type_!r}"
             )
         for v in value:
+            if len(v) == 1 and "@id" in v:
+                from .entity import EntityRef
+
+                return EntityRef(v["@id"])
             for t in types:
                 try:
-                    return await from_jsonld(t, v)
+                    return await from_jsonld(t, v)  # type: ignore
                 except ValueError:
                     continue
         raise ValueError(f"cannot convert {value!r} to {type_.__name__}")

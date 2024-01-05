@@ -1,15 +1,18 @@
 from datetime import datetime
-from typing import Any, Mapping, NewType, Optional, TypeVar
+from typing import Any, Mapping, NewType, Optional, TypeVar, Union
 
 from langcodes import Language
 
 from .docloader import DocumentLoader
+from .scalars import ScalarValue
 
 __all__ = ["from_jsonld", "jsonld"]
 
 
 async def jsonld(
-    value: Any, expand: bool = False, loader: Optional[DocumentLoader] = None
+    value: Union[ScalarValue, "Entity"],
+    expand: bool = False,
+    loader: Optional[DocumentLoader] = None,
 ) -> Mapping[str, Any]:
     """Turn a Python object into a JSON-LD document.
 
@@ -21,7 +24,7 @@ async def jsonld(
     :raises TypeError: If the given value cannot be converted to JSON-LD.
     """
     if hasattr(value, "__jsonld__"):
-        doc = value.__jsonld__(expand=expand, loader=loader)
+        doc = value.__jsonld__(expand=expand, loader=loader)  # pyright: ignore
         return dict(doc if isinstance(doc, Mapping) else await doc)
     match value:
         case str() | bool():
@@ -45,7 +48,7 @@ async def jsonld(
     raise TypeError(f"cannot convert {type(value).__name__} to JSON-LD")
 
 
-T = TypeVar("T")
+T = TypeVar("T", bound=Union[ScalarValue, "Entity"])
 
 
 async def from_jsonld(cls: type[T], document: Mapping[str, Any]) -> T:
@@ -62,7 +65,9 @@ async def from_jsonld(cls: type[T], document: Mapping[str, Any]) -> T:
     if hasattr(cls, "__from_jsonld__"):
         instance = cls.__from_jsonld__(document)  # type: ignore
         return (  # type: ignore
-            instance if isinstance(instance, cls) else await instance
+            instance
+            if isinstance(instance, cls)
+            else await instance  # type: ignore
         )
     elif issubclass(cls, (str, bool)):
         return cls(document["@value"])  # type: ignore
@@ -73,3 +78,6 @@ async def from_jsonld(cls: type[T], document: Mapping[str, Any]) -> T:
     elif issubclass(cls, Language):
         return Language.get(document["@value"])  # type: ignore
     raise ValueError(f"cannot convert JSON-LD to {cls.__name__}")
+
+
+from .entity import Entity  # noqa: E402
