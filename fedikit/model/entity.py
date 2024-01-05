@@ -9,6 +9,7 @@ from typing import (
     Self,
     TypeAlias,
     dataclass_transform,
+    get_type_hints,
 )
 
 from pyld import jsonld
@@ -76,6 +77,7 @@ class Entity:
         descriptors: Mapping[Uri, Mapping[str, Property]] = (
             get_uri_descriptors(cls)
         )
+        type_hints = get_type_hints(cls)
         for uri, vals in doc.items():
             desc_dict = descriptors.get(Uri(uri), {})
             desc_kvs = list(desc_dict.items())
@@ -84,7 +86,7 @@ class Entity:
             for name, desc in desc_kvs:
                 try:
                     values[name] = await desc.parse_jsonld(
-                        cls.__annotations__[name], vals
+                        type_hints[name], vals
                     )
                 except TypeError:
                     continue
