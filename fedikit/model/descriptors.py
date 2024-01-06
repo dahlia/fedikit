@@ -94,11 +94,13 @@ class IdProperty(Property):
 
 
 class ResourceProperty(Property):
+    subproperties: Sequence["Uri"]
     class_def_site: Optional[str]
     _uri: "Uri"
 
-    def __init__(self, uri: "Uri"):
+    def __init__(self, uri: "Uri", subproperties: Sequence["Uri"] = ()):
         self._uri = uri
+        self.subproperties = subproperties
         current_frame = currentframe()
         if current_frame is None:
             self.class_def_site = None
@@ -126,11 +128,13 @@ class PluralProperty(ResourceProperty):
             return self
         from .entity import EntityRef
 
-        return [
-            v
-            for v in instance._values[self.uri]
-            if not isinstance(v, EntityRef)
-        ]
+        values = []
+        for uri in (self.uri, *self.subproperties):
+            for v in instance._values[uri]:
+                if isinstance(v, EntityRef):
+                    continue
+                values.append(v)
+        return values
 
     def normalize(self, value: Any) -> "Slot":
         return [v for v in value]
@@ -209,10 +213,10 @@ class SingularProperty(ResourceProperty):
             return self
         from .entity import EntityRef
 
-        values = instance._values[self.uri]
-        for v in values:
-            if not isinstance(v, EntityRef):
-                return v
+        for uri in (self.uri, *self.subproperties):
+            for v in instance._values[uri]:
+                if not isinstance(v, EntityRef):
+                    return v
         return None
 
     def normalize(self, value: Any) -> "Slot":
@@ -279,9 +283,9 @@ def id_property() -> Any:
     return IdProperty()
 
 
-def plural_property(uri: "Uri") -> Any:
-    return PluralProperty(uri)
+def plural_property(uri: "Uri", subproperties: Sequence["Uri"] = ()) -> Any:
+    return PluralProperty(uri, subproperties=subproperties)
 
 
-def singular_property(uri: "Uri") -> Any:
-    return SingularProperty(uri)
+def singular_property(uri: "Uri", subproperties: Sequence["Uri"] = ()) -> Any:
+    return SingularProperty(uri, subproperties=subproperties)

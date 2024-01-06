@@ -328,7 +328,7 @@ async def load_entity_refs(
     properties: Optional[str | Iterable[str]] = None,
     loader: Optional[DocumentLoader] = None,
 ) -> None:
-    """Resolve :class:`EntityRef`s and replace them with the loaded
+    r"""Resolve :class:`EntityRef`\ s and replace them with the loaded
     :class:`Entity` instances in the given :paramref:`entity`.
 
     :param entity: The entity to resolve references in.

@@ -62,6 +62,77 @@ async def test_activity_attachment(document_loader: DocumentLoader) -> None:
 
 
 @pytest.mark.asyncio
+async def test_activity_attributed_tos(
+    document_loader: DocumentLoader,
+) -> None:
+    act = Activity(
+        actors=[
+            Object(name="foo"),
+            Link(href=Uri("https://example.com/bar")),
+        ],
+        attributed_tos=[
+            Object(name="baz"),
+            Link(href=Uri("https://example.com/qux")),
+        ],
+    )
+    assert act.actor == Object(name="foo")
+    assert act.actors == [
+        Object(name="foo"),
+        Link(href=Uri("https://example.com/bar")),
+    ]
+    assert act.attributed_to == Object(name="baz")
+    assert act.attributed_tos == [
+        Object(name="baz"),
+        Link(href=Uri("https://example.com/qux")),
+        Object(name="foo"),
+        Link(href=Uri("https://example.com/bar")),
+    ]
+    assert await jsonld(act, expand=True, loader=document_loader) == {
+        "@type": ["https://www.w3.org/ns/activitystreams#Activity"],
+        "https://www.w3.org/ns/activitystreams#actor": [
+            {
+                "@type": ["https://www.w3.org/ns/activitystreams#Object"],
+                "https://www.w3.org/ns/activitystreams#name": [
+                    {"@value": "foo"}
+                ],
+            },
+            {
+                "@type": ["https://www.w3.org/ns/activitystreams#Link"],
+                "https://www.w3.org/ns/activitystreams#href": [
+                    {"@value": "https://example.com/bar"}
+                ],
+            },
+        ],
+        "https://www.w3.org/ns/activitystreams#attributedTo": [
+            {
+                "@type": ["https://www.w3.org/ns/activitystreams#Object"],
+                "https://www.w3.org/ns/activitystreams#name": [
+                    {"@value": "baz"}
+                ],
+            },
+            {
+                "@type": ["https://www.w3.org/ns/activitystreams#Link"],
+                "https://www.w3.org/ns/activitystreams#href": [
+                    {"@value": "https://example.com/qux"}
+                ],
+            },
+        ],
+    }
+    assert await jsonld(act, loader=document_loader) == {
+        "@context": "https://www.w3.org/ns/activitystreams",
+        "actor": [
+            {"name": "foo", "type": "Object"},
+            {"as:href": "https://example.com/bar", "type": "Link"},
+        ],
+        "attributedTo": [
+            {"name": "baz", "type": "Object"},
+            {"as:href": "https://example.com/qux", "type": "Link"},
+        ],
+        "type": "Activity",
+    }
+
+
+@pytest.mark.asyncio
 async def test_activity_object(document_loader: DocumentLoader) -> None:
     act = Activity(object=Object(name="foo"))
     assert act.object == Object(name="foo")

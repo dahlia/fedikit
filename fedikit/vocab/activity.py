@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from typing import Union
 
 from ..model.descriptors import plural_property, singular_property
 from ..model.entity import Uri
@@ -18,6 +19,33 @@ class Activity(Object):
 
     __uri__ = Uri("https://www.w3.org/ns/activitystreams#Activity")
     __default_context__ = Uri("https://www.w3.org/ns/activitystreams")
+
+    #: Describes one or more entities that either performed or are expected to
+    #: perform the activity.  Any single activity can have multiple
+    #: ``actor``\ s.  The ``actor`` *may* be specified using an indirect
+    #: :class:`Link`.
+    actor: Union["Object", Link] = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#actor")
+    )
+
+    #: Plural accessor for :attr:`actor`.
+    actors: Sequence[Union["Object", Link]] = plural_property(
+        Uri("https://www.w3.org/ns/activitystreams#actor")
+    )
+
+    #: Identifies one or more entities to which this object is attributed.
+    #: The attributed entities might not be :class:`Actor`\ s.  For instance,
+    #: an object might be attributed to the completion of another activity.
+    attributed_to: Union["Object", Link] = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#attributedTo"),
+        subproperties=[Uri("https://www.w3.org/ns/activitystreams#actor")],
+    )
+
+    #: Plural accessor for :attr:`attributed_to`.
+    attributed_tos: Sequence[Union["Object", Link]] = plural_property(
+        Uri("https://www.w3.org/ns/activitystreams#attributedTo"),
+        subproperties=[Uri("https://www.w3.org/ns/activitystreams#actor")],
+    )
 
     #: Describes the direct object of the activity.  For instance, in the
     #: activity "John added a movie to his wishlist", the object of
