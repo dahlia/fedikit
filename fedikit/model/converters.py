@@ -51,11 +51,17 @@ async def jsonld(
 T = TypeVar("T", bound=Union[ScalarValue, "Entity"])
 
 
-async def from_jsonld(cls: type[T], document: Mapping[str, Any]) -> T:
+async def from_jsonld(
+    cls: type[T],
+    document: Mapping[str, Any],
+    loader: Optional[DocumentLoader] = None,
+) -> T:
     """Turn a JSON-LD document into a Python object.
 
     :param cls: The class to convert the document to.
     :param document: The JSON-LD document to convert.
+    :param loader: A document loader to use.  If not given, the default
+        document loader will be used.
     :return: The converted object.
     :raises ValueError: If the given document cannot be converted to the
         given class.
@@ -63,7 +69,7 @@ async def from_jsonld(cls: type[T], document: Mapping[str, Any]) -> T:
     if isinstance(cls, NewType):
         cls = cls.__supertype__
     if hasattr(cls, "__from_jsonld__"):
-        instance = cls.__from_jsonld__(document)  # type: ignore
+        instance = cls.__from_jsonld__(document, loader)  # type: ignore
         return (  # type: ignore
             instance
             if isinstance(instance, cls)

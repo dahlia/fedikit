@@ -1,5 +1,5 @@
 from asyncio import to_thread
-from collections.abc import Mapping, Sequence
+from collections.abc import Mapping, MutableSequence, Sequence
 from typing import (
     Any,
     ClassVar,
@@ -7,6 +7,7 @@ from typing import (
     Optional,
     Self,
     TypeAlias,
+    TypeVar,
     Union,
     cast,
     dataclass_transform,
@@ -21,13 +22,15 @@ from .descriptors import Property, SingularProperty
 from .docloader import DocumentLoader
 from .scalars import ScalarValue
 
-__all__ = ["Entity", "EntityRef", "Slot", "Uri"]
+__all__ = ["Entity", "EntityRef", "Slot", "Uri", "load_entity_refs"]
 
 
 Uri = NewType("Uri", str)
 
 
-Slot: TypeAlias = Uri | Sequence[Union["EntityRef", ScalarValue, "Entity"]]
+Slot: TypeAlias = (
+    Uri | MutableSequence[Union["EntityRef", ScalarValue, "Entity"]]
+)
 
 
 @dataclass_transform(frozen_default=True, kw_only_default=True)
@@ -64,7 +67,7 @@ class Entity:
         )
         if "@type" not in doc:
             raise ValueError("missing '@type' in JSON-LD document")
-        elif cls.__uri__ not in doc["@type"]:
+        elif cls is Entity or cls.__uri__ not in doc["@type"]:
             for subclass in cls.__subclasses__():
                 if subclass.__uri__ in doc["@type"]:
                     assert issubclass(subclass, cls)
@@ -202,28 +205,36 @@ class Entity:
         return f"{cls.__name__}({args})"
 
 
-def get_descriptors(cls: type) -> Mapping[str, Property]:
-    if hasattr(cls, "__descriptors__"):
-        return cls.__descriptors__  # type: ignore
-    properties = {
-        name: getattr(cls, name)
-        for name in dir(cls)
-        if isinstance(getattr(cls, name), Property)
-    }
-    cls.__descriptors__ = properties  # type: ignore
+descriptors: dict[type[Entity], Mapping[str, Property]] = {}
+
+
+def get_descriptors(cls: type[Entity]) -> Mapping[str, Property]:
+    global descriptors
+    properties = descriptors.get(cls)
+    if properties is None:
+        properties = {
+            name: getattr(cls, name)
+            for name in dir(cls)
+            if isinstance(getattr(cls, name), Property)
+        }
+        descriptors[cls] = properties
     return properties
 
 
+uri_descriptors: dict[type[Entity], Mapping[Uri, Mapping[str, Property]]] = {}
+
+
 def get_uri_descriptors(
-    cls: type,
+    cls: type[Entity],
 ) -> Mapping[Uri, Mapping[str, Property]]:
-    if hasattr(cls, "__uri_descriptors__"):
-        return cls.__uri_descriptors__  # type: ignore
+    global uri_descriptors
+    if cls in uri_descriptors:
+        return uri_descriptors[cls]
     uri_props: dict[Uri, dict[str, Property]] = {}
     props = get_descriptors(cls)
     for name, prop in props.items():
         uri_props.setdefault(prop.uri, {})[name] = prop
-    cls.__uri_descriptors__ = uri_props  # type: ignore
+    uri_descriptors[cls] = uri_props
     return uri_props
 
 
@@ -259,6 +270,9 @@ def get_raw_document_loader(loader: Optional[DocumentLoader] = None) -> Any:
     return doc_loader
 
 
+T = TypeVar("T", bound=Entity)
+
+
 class EntityRef:
     """A reference to an :class:`Entity`.  It is used to represent references
     to entities in other entities, which are not loaded yet.
@@ -279,5 +293,49 @@ class EntityRef:
     def __hash__(self) -> int:
         return hash(self.uri)
 
+    async def load(
+        self, cls: type[T], loader: Optional[DocumentLoader] = None
+    ) -> T:
+        """Resolve the reference and load the entity.
+
+        :param cls: The class to load the entity as.  It must be a subclass of
+            :class:`Entity`.
+        :param loader: A document loader to use.  If not given, the default
+            document loader will be used.
+        :return: The loaded entity.
+        """
+        if not issubclass(cls, Entity):
+            raise TypeError(f"expected a subtype of Entity, got {cls!r}")
+        document_loader = get_raw_document_loader(loader)
+        loaded = await to_thread(lambda: document_loader(self.uri, {}))
+        doc = await to_thread(
+            lambda: jsonld.expand(
+                loaded["document"],
+                {
+                    "documentLoader": document_loader,
+                    "expandContext": loaded["contextUrl"],
+                },
+            )
+        )
+        return await cls.__from_jsonld__(doc[0], loader=loader)
+
     def __repr__(self) -> str:
         return f"{type(self).__name__}({self.uri!r})"
+
+
+async def load_entity_refs(
+    entity: Entity, loader: Optional[DocumentLoader] = None
+) -> None:
+    """Resolve all :class:`EntityRef`s and replace them with the loaded
+    :class:`Entity` instances in the given :paramref:`entity`.
+
+    :param entity: The entity to resolve references in.
+    :param loader: A document loader to use.  If not given, the default
+        document loader will be used.
+    """
+    for slot in entity._values.values():
+        if isinstance(slot, str):
+            continue
+        for i, value in enumerate(slot):
+            if isinstance(value, EntityRef):
+                slot[i] = await value.load(Entity, loader=loader)

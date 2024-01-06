@@ -2,7 +2,10 @@ from typing import Any
 
 import pytest
 
-from fedikit.model.entity import EntityRef, Uri
+from fedikit.model.docloader import DocumentLoader
+from fedikit.model.entity import Entity, EntityRef, Uri, load_entity_refs
+from fedikit.vocab.link import Link
+from fedikit.vocab.object import Object
 
 
 def test_entity_ref_uri():
@@ -46,3 +49,32 @@ def test_entity_ref_inequality(a: EntityRef, b: Any) -> None:
     assert not (a == b)
     assert not (b == a)
     assert hash(a) != hash(b)
+
+
+@pytest.mark.asyncio
+async def test_entity_ref_load(document_loader: DocumentLoader) -> None:
+    ref = EntityRef("https://example.com/foo")
+    entity = await ref.load(Entity, loader=document_loader)
+    assert entity == Object(
+        name="foo",
+        attachments=[
+            Object(name="bar"),
+            Link(href=Uri("https://example.com/")),
+        ],
+    )
+
+
+@pytest.mark.asyncio
+async def test_load_entity_refs(document_loader: DocumentLoader) -> None:
+    obj = Object(
+        attachment=EntityRef("https://example.com/foo"),  # type: ignore
+    )
+    assert obj.attachment is None
+    await load_entity_refs(obj, loader=document_loader)
+    assert obj.attachment == Object(
+        name="foo",
+        attachments=[
+            Object(name="bar"),
+            Link(href=Uri("https://example.com/")),
+        ],
+    )

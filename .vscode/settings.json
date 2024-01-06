@@ -30,6 +30,7 @@
     "langcodes",
     "langstr",
     "mypy",
+    "paramref",
     "pyld",
     "pyproject",
     "pytest",

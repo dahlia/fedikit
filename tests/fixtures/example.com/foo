@@ -1,0 +1,15 @@
+{
+  "@context": "https://www.w3.org/ns/activitystreams",
+  "type": "Object",
+  "name": "foo",
+  "attachment": [
+    {
+      "type": "Object",
+      "name": "bar"
+    },
+    {
+      "type": "Link",
+      "as:href": "https://example.com/"
+    }
+  ]
+}

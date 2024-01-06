@@ -7,6 +7,7 @@ from types import GenericAlias, UnionType
 from typing import Any, ForwardRef, NewType, Optional, Self, Union
 
 from .converters import from_jsonld
+from .docloader import DocumentLoader
 
 if typing.TYPE_CHECKING:
     from .entity import Entity, EntityRef, Slot, Uri
@@ -44,7 +45,9 @@ class Property(ABC):
         return slot
 
     @abstractmethod
-    async def parse_jsonld(self, type_: Any, value: Any) -> Union[
+    async def parse_jsonld(
+        self, type_: Any, value: Any, loader: Optional[DocumentLoader] = None
+    ) -> Union[
         "Uri",
         "EntityRef",
         "ScalarValue",
@@ -76,7 +79,9 @@ class IdProperty(Property):
     def check_slot(self, slot: "Slot") -> bool:
         return isinstance(slot, str)
 
-    async def parse_jsonld(self, type_: Any, value: Any) -> Union[
+    async def parse_jsonld(
+        self, type_: Any, value: Any, loader: Optional[DocumentLoader] = None
+    ) -> Union[
         "Uri",
         "EntityRef",
         "ScalarValue",
@@ -133,7 +138,9 @@ class PluralProperty(ResourceProperty):
     def check_slot(self, slot: "Slot") -> bool:
         return not isinstance(slot, str) and len(slot) != 1
 
-    async def parse_jsonld(self, type_: Any, value: Any) -> Union[
+    async def parse_jsonld(
+        self, type_: Any, value: Any, loader: Optional[DocumentLoader] = None
+    ) -> Union[
         "Uri",
         "EntityRef",
         "ScalarValue",
@@ -184,7 +191,11 @@ class PluralProperty(ResourceProperty):
                 continue
             for et in element_types:
                 try:
-                    parsed.append(await from_jsonld(et, v))  # pyright: ignore
+                    parsed.append(
+                        await from_jsonld(
+                            et, v, loader=loader  # pyright: ignore
+                        )
+                    )
                 except ValueError:
                     continue
                 else:
@@ -213,7 +224,9 @@ class SingularProperty(ResourceProperty):
     def repr_value(self, slot: "Slot") -> Any:
         return slot[0]
 
-    async def parse_jsonld(self, type_: Any, value: Any) -> Union[
+    async def parse_jsonld(
+        self, type_: Any, value: Any, loader: Optional[DocumentLoader] = None
+    ) -> Union[
         "Uri",
         "EntityRef",
         "ScalarValue",
@@ -254,7 +267,9 @@ class SingularProperty(ResourceProperty):
                 return EntityRef(v["@id"])
             for t in types:
                 try:
-                    return await from_jsonld(t, v)  # type: ignore
+                    return await from_jsonld(  # type: ignore
+                        t, v, loader=loader  # pyright: ignore
+                    )
                 except ValueError:
                     continue
         raise ValueError(f"cannot convert {value!r} to {type_.__name__}")

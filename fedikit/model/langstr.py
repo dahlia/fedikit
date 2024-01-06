@@ -1,6 +1,8 @@
-from typing import Any, Mapping, Self
+from typing import Any, Mapping, Optional, Self
 
 from langcodes import Language
+
+from .docloader import DocumentLoader
 
 __all__ = ["LanguageString"]
 
@@ -23,7 +25,11 @@ class LanguageString(str):
         self.language = language
 
     @classmethod
-    def __from_jsonld__(cls, document: Mapping[str, Any]) -> Self:
+    def __from_jsonld__(
+        cls,
+        document: Mapping[str, Any],
+        loader: Optional[DocumentLoader] = None,
+    ) -> Self:
         return cls(document["@value"], document["@language"])
 
     def __eq__(self, other: object) -> bool:
