@@ -1,5 +1,5 @@
 from asyncio import to_thread
-from collections.abc import Mapping, MutableSequence, Sequence
+from collections.abc import Iterable, Mapping, MutableSequence, Sequence
 from typing import (
     Any,
     ClassVar,
@@ -324,17 +324,33 @@ class EntityRef:
 
 
 async def load_entity_refs(
-    entity: Entity, loader: Optional[DocumentLoader] = None
+    entity: Entity,
+    properties: Optional[str | Iterable[str]] = None,
+    loader: Optional[DocumentLoader] = None,
 ) -> None:
-    """Resolve all :class:`EntityRef`s and replace them with the loaded
+    """Resolve :class:`EntityRef`s and replace them with the loaded
     :class:`Entity` instances in the given :paramref:`entity`.
 
     :param entity: The entity to resolve references in.
+    :param properties: The properties to resolve references in.  If not given,
+        all properties will be resolved.
     :param loader: A document loader to use.  If not given, the default
         document loader will be used.
     """
-    for slot in entity._values.values():
-        if isinstance(slot, str):
+    descriptors = get_descriptors(type(entity))
+    if properties is not None:
+        if isinstance(properties, str):
+            properties = [properties]
+        for prop in properties:
+            if prop not in descriptors:
+                raise AttributeError(
+                    f"{type(entity).__name__} has no property named {prop!r}"
+                )
+    for name, descriptor in descriptors.items():
+        if properties is not None and name not in properties:
+            continue
+        slot = entity._values.get(descriptor.uri)
+        if slot is None or isinstance(slot, str):
             continue
         for i, value in enumerate(slot):
             if isinstance(value, EntityRef):

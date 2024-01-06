@@ -4,6 +4,7 @@ import pytest
 
 from fedikit.model.docloader import DocumentLoader
 from fedikit.model.entity import Entity, EntityRef, Uri, load_entity_refs
+from fedikit.vocab.activity import Activity
 from fedikit.vocab.link import Link
 from fedikit.vocab.object import Object
 
@@ -66,15 +67,34 @@ async def test_entity_ref_load(document_loader: DocumentLoader) -> None:
 
 @pytest.mark.asyncio
 async def test_load_entity_refs(document_loader: DocumentLoader) -> None:
-    obj = Object(
+    act = Activity(
         attachment=EntityRef("https://example.com/foo"),  # type: ignore
+        object=EntityRef("https://example.com/bar"),  # type: ignore
     )
-    assert obj.attachment is None
-    await load_entity_refs(obj, loader=document_loader)
-    assert obj.attachment == Object(
+    assert act.attachment is None
+    assert act.object is None
+    await load_entity_refs(act, "attachment", loader=document_loader)
+    assert act.attachment == Object(
         name="foo",
         attachments=[
             Object(name="bar"),
             Link(href=Uri("https://example.com/")),
         ],
     )
+    assert act.object is None
+
+    act2 = Activity(
+        attachment=EntityRef("https://example.com/foo"),  # pyright: ignore
+        object=EntityRef("https://example.com/bar"),  # pyright: ignore
+    )
+    assert act2.attachment is None
+    assert act2.object is None
+    await load_entity_refs(act2, loader=document_loader)
+    assert act2.attachment == Object(
+        name="foo",
+        attachments=[
+            Object(name="bar"),
+            Link(href=Uri("https://example.com/")),
+        ],
+    )
+    assert act2.object == Object(name="bar")
