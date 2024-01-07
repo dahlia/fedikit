@@ -23,6 +23,8 @@
     "aiohttp",
     "asyncio",
     "attributee",
+    "bccs",
+    "btos",
     "docloader",
     "documentloader",
     "fedikit",
