@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 from datetime import datetime
-from typing import Union
+from typing import Literal, Union
 
 from isoduration.types import Duration
 
@@ -9,7 +9,16 @@ from ..model.entity import Entity, Uri
 from ..model.langstr import LanguageString
 from .link import Link
 
-__all__ = ["Object"]
+__all__ = [
+    "Article",
+    "Event",
+    "Note",
+    "Object",
+    "Place",
+    "Profile",
+    "Relationship",
+    "Tombstone",
+]
 
 
 class Object(Entity):
@@ -298,6 +307,145 @@ class Object(Entity):
     #: __ https://www.w3.org/TR/xmlschema11-2/
     duration: Duration = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#duration")
+    )
+
+
+class Article(Object):
+    """Represents any kind of multi-paragraph written work."""
+
+    __uri__ = Uri("https://www.w3.org/ns/activitystreams#Article")
+
+
+class Event(Object):
+    """Represents any kind of event."""
+
+    __uri__ = Uri("https://www.w3.org/ns/activitystreams#Event")
+
+
+class Note(Object):
+    """Represents a short written work typically less than a single paragraph
+    in length.
+    """
+
+    __uri__ = Uri("https://www.w3.org/ns/activitystreams#Note")
+
+
+class Place(Object):
+    """Represents a logical or physical location.  See `Activity Vocabulary 5.3
+    Representing Places`__ for additional information.
+
+    __ https://www.w3.org/TR/activitystreams-vocabulary/#places
+    """
+
+    __uri__ = Uri("https://www.w3.org/ns/activitystreams#Place")
+
+    #: Specifies the measurement units for the :attr:`radius` and
+    #: :attr:`altitude` properties on a :class:`Place` object.
+    #: If not specified, the default is assumed to be "``m``" for "meters".
+    units: Literal["cm", "feet", "inches", "km", "m", "miles"] | Uri = (
+        singular_property(Uri("https://www.w3.org/ns/activitystreams#units"))
+    )
+
+
+class Profile(Object):
+    """A ``Profile`` is a content object that describes another
+    :class:`Object`, typically used to describe `Actor Type`__ objects.
+    The :attr:`describes` property is used to reference the object being
+    described by the profile.
+    """
+
+    __uri__ = Uri("https://www.w3.org/ns/activitystreams#Profile")
+
+    #: On a :class:`Profile` object, the describes property identifies
+    #: the object described by the :class:`Profile`.
+    describes: Object = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#describes")
+    )
+
+
+class Relationship(Object):
+    """Describes a relationship between two individuals.  The :attr:`subject`
+    and :attr:`object` properties are used to identify the connected
+    individuals.
+
+    See `Activity Vocabulary 5.2 Representing Relationships Between Entities`__
+    for additional information.
+
+    __ https://www.w3.org/TR/activitystreams-vocabulary/#connections
+    """
+
+    __uri__ = Uri("https://www.w3.org/ns/activitystreams#Relationship")
+
+    #: On a :class:`Relationship` object, the :attr:`subject` property
+    #: identifies one of the connected individuals.  For instance,
+    #: for a ``Relationship`` object describing "John is related to Sally",
+    #: ``subject`` would refer to John.
+    subject: Link | Object = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#subject")
+    )
+
+    #: Describes the entity to which the :attr:`subject` is related.
+    object: Object | Link = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#object")
+    )
+
+    #: Plural accessor for :attr:`object`.
+    objects: Sequence[Object | Link] = plural_property(
+        Uri("https://www.w3.org/ns/activitystreams#object")
+    )
+
+    #: On a :class:`Relationship` object, the ``relationship`` property
+    #: identifies the kind of relationship that exists between :attr:`subject`
+    #: and :attr:`object`.
+    #:
+    #: .. note::
+    #:
+    #:    According to the specification, its domain is ``Object``.  However,
+    #:    the example in the specification shows it can have a value of
+    #:    ``xsd:anyURI``.  Hence, we use ``Object | Uri`` here.
+    relationship: Object | Uri = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#relationship")
+    )
+
+    #: Plural accessor for :attr:`relationship`.
+    relationships: Sequence[Object | Uri] = plural_property(
+        Uri("https://www.w3.org/ns/activitystreams#relationship")
+    )
+
+
+class Tombstone(Object):
+    r"""A ``Tombstone`` represents a content object that has been deleted.
+    It can be used in :class:`Collection`\ s to signify that there used to be
+    an object at this position, but it has been deleted.
+    """
+
+    __uri__ = Uri("https://www.w3.org/ns/activitystreams#Tombstone")
+
+    #: On a :class:`Tombstone` object, the :attr:`former_type` property
+    #: identifies the type of the object that was deleted.
+    #:
+    #: .. note::
+    #:
+    #:    According to the specification, its domain is ``Object``.  However,
+    #:    the example in the specification shows it can have a value of
+    #:    ``xsd:anyURI``.  Hence, we use ``Object | Uri`` here.
+    #:
+    #:    See also the `related issue`__.
+    #:
+    #:    __ https://github.com/w3c/activitystreams/issues/440
+    former_type: Object | Uri = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#formerType")
+    )
+
+    #: Plural accessor for :attr:`former_type`.
+    former_types: Sequence[Object | Uri] = plural_property(
+        Uri("https://www.w3.org/ns/activitystreams#formerType")
+    )
+
+    #: On a :class:`Tombstone` object, the ``deleted`` property is a timestamp
+    #: for when the object was deleted.
+    deleted: datetime = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#deleted")
     )
 
 

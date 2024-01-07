@@ -151,6 +151,8 @@ class PluralProperty(ResourceProperty):
         "Entity",
         Sequence[Union["EntityRef", "ScalarValue", "Entity"]],
     ]:
+        from .entity import Uri
+
         if not (
             isinstance(
                 type_,
@@ -182,6 +184,10 @@ class PluralProperty(ResourceProperty):
                         f"failed to resolve deferred type name {et_name!r}"
                     )
                 element_types[i] = et
+            elif et is Uri:
+                element_types[i] = str
+            elif isinstance(et, typing._LiteralGenericAlias):  # type: ignore
+                element_types[i] = str  # FIXME: support other literal types
         if not all(isinstance(et, type) for et in element_types):
             raise TypeError(
                 f"expected Sequence[T] where T is a class, got {type_!r}"
@@ -237,6 +243,8 @@ class SingularProperty(ResourceProperty):
         "Entity",
         Sequence[Union["EntityRef", "ScalarValue", "Entity"]],
     ]:
+        from .entity import Uri
+
         if isinstance(type_, UnionType):
             types = list(type_.__args__)
         elif (
@@ -259,7 +267,11 @@ class SingularProperty(ResourceProperty):
                         f"failed to resolve deferred type name {t_name!r}"
                     )
                 types[i] = t
-        if not all(isinstance(et, type) for et in types):
+            elif t is Uri:
+                types[i] = str
+            elif isinstance(t, typing._LiteralGenericAlias):  # type: ignore
+                types[i] = str  # FIXME: support other literal types
+        if not all(isinstance(t, type) for t in types):
             raise TypeError(
                 "expected T or Union[T, ...] where T is a class, got"
                 f" {type_!r}"

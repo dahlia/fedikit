@@ -9,7 +9,7 @@ from fedikit.model.entity import EntityRef, Uri
 from fedikit.model.langstr import LanguageString
 from fedikit.vocab.collection import Collection
 from fedikit.vocab.link import Link
-from fedikit.vocab.object import Object
+from fedikit.vocab.object import Object, Place
 
 
 @pytest.mark.asyncio
@@ -266,3 +266,27 @@ def test_object_repr():
         == "Object(names=['foo', 'bar'], "
         "__extra__={'https://example.com/': {'@value': 'foo'}})"
     )
+
+
+@pytest.mark.asyncio
+async def test_place_from_jsonld() -> None:
+    parsed = await from_jsonld(
+        Object,
+        {
+            "@context": "https://www.w3.org/ns/activitystreams",
+            "type": "Place",
+            "units": "miles",
+        },
+    )
+    assert parsed == Place(units="miles")
+
+
+@pytest.mark.asyncio
+async def test_place_units(document_loader: DocumentLoader) -> None:
+    place = Place(units="cm")
+    assert place.units == "cm"
+    assert await jsonld(place, loader=document_loader) == {
+        "@context": "https://www.w3.org/ns/activitystreams",
+        "type": "Place",
+        "units": "cm",
+    }
