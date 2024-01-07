@@ -7,7 +7,7 @@ from .collection import (
     OrderedCollectionPage,
 )
 from .document import Audio, Document, Image, Page, Video
-from .link import Link
+from .link import Link, Mention
 from .object import Object
 
 __all__ = [
@@ -21,6 +21,7 @@ __all__ = [
     "Group",
     "Image",
     "Link",
+    "Mention",
     "Object",
     "OrderedCollection",
     "OrderedCollectionPage",

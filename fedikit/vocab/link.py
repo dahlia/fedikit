@@ -7,7 +7,7 @@ from ..model.descriptors import id_property, plural_property, singular_property
 from ..model.entity import Entity, Uri
 from ..model.langstr import LanguageString
 
-__all__ = ["Link"]
+__all__ = ["Link", "Mention"]
 
 
 class Link(Entity):
@@ -97,6 +97,12 @@ class Link(Entity):
     previews: Sequence[Union["Link", "Object"]] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#preview")
     )
+
+
+class Mention(Link):
+    """A specialized :class:`Link` that represents an @mention."""
+
+    __uri__ = Uri("https://www.w3.org/ns/activitystreams#Mention")
 
 
 from .object import Object  # noqa: E402
