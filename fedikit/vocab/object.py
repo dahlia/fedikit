@@ -122,6 +122,30 @@ class Object(Entity):
         Uri("https://www.w3.org/ns/activitystreams#generator")
     )
 
+    #: Indicates an entity that describes an icon for this object.
+    #: The image should have an aspect ratio of one (horizontal) to
+    #: one (vertical) and should be suitable for presentation at a small size.
+    icon: Union["Image", Link] = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#icon")
+    )
+
+    #: Plural accessor for :attr:`icon`.
+    icons: Sequence[Union["Image", Link]] = plural_property(
+        Uri("https://www.w3.org/ns/activitystreams#icon")
+    )
+
+    #: Indicates an entity that describes an image for this object.
+    #: Unlike the :attr:`icon` property, there are no aspect ratio or display
+    #: size limitations assumed.
+    image: Union["Image", Link] = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#image")
+    )
+
+    #: Plural accessor for :attr:`image`.
+    images: Sequence[Union["Image", Link]] = plural_property(
+        Uri("https://www.w3.org/ns/activitystreams#image")
+    )
+
     #: Indicates one or more entities for which this object is considered
     #: a response.
     in_reply_to: Union["Object", Link] = singular_property(
@@ -269,3 +293,6 @@ class Object(Entity):
     duration: Duration = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#duration")
     )
+
+
+from .document import Image  # noqa: E402
