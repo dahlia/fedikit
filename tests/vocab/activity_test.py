@@ -4,6 +4,7 @@ from fedikit.model.converters import from_jsonld, jsonld
 from fedikit.model.docloader import DocumentLoader
 from fedikit.model.entity import Uri
 from fedikit.vocab.activity import Activity
+from fedikit.vocab.actor import Person
 from fedikit.vocab.link import Link
 from fedikit.vocab.object import Object
 
@@ -67,31 +68,31 @@ async def test_activity_attributed_tos(
 ) -> None:
     act = Activity(
         actors=[
-            Object(name="foo"),
+            Person(name="foo"),
             Link(href=Uri("https://example.com/bar")),
         ],
         attributed_tos=[
-            Object(name="baz"),
+            Person(name="baz"),
             Link(href=Uri("https://example.com/qux")),
         ],
     )
-    assert act.actor == Object(name="foo")
+    assert act.actor == Person(name="foo")
     assert act.actors == [
-        Object(name="foo"),
+        Person(name="foo"),
         Link(href=Uri("https://example.com/bar")),
     ]
-    assert act.attributed_to == Object(name="baz")
+    assert act.attributed_to == Person(name="baz")
     assert act.attributed_tos == [
-        Object(name="baz"),
+        Person(name="baz"),
         Link(href=Uri("https://example.com/qux")),
-        Object(name="foo"),
+        Person(name="foo"),
         Link(href=Uri("https://example.com/bar")),
     ]
     assert await jsonld(act, expand=True, loader=document_loader) == {
         "@type": ["https://www.w3.org/ns/activitystreams#Activity"],
         "https://www.w3.org/ns/activitystreams#actor": [
             {
-                "@type": ["https://www.w3.org/ns/activitystreams#Object"],
+                "@type": ["https://www.w3.org/ns/activitystreams#Person"],
                 "https://www.w3.org/ns/activitystreams#name": [
                     {"@value": "foo"}
                 ],
@@ -105,7 +106,7 @@ async def test_activity_attributed_tos(
         ],
         "https://www.w3.org/ns/activitystreams#attributedTo": [
             {
-                "@type": ["https://www.w3.org/ns/activitystreams#Object"],
+                "@type": ["https://www.w3.org/ns/activitystreams#Person"],
                 "https://www.w3.org/ns/activitystreams#name": [
                     {"@value": "baz"}
                 ],
@@ -121,11 +122,11 @@ async def test_activity_attributed_tos(
     assert await jsonld(act, loader=document_loader) == {
         "@context": "https://www.w3.org/ns/activitystreams",
         "actor": [
-            {"name": "foo", "type": "Object"},
+            {"name": "foo", "type": "Person"},
             {"as:href": "https://example.com/bar", "type": "Link"},
         ],
         "attributedTo": [
-            {"name": "baz", "type": "Object"},
+            {"name": "baz", "type": "Person"},
             {"as:href": "https://example.com/qux", "type": "Link"},
         ],
         "type": "Activity",
