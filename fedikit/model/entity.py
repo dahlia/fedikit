@@ -68,12 +68,14 @@ class Entity:
         if "@type" not in doc:
             raise ValueError("missing '@type' in JSON-LD document")
         elif cls is Entity or cls.__uri__ not in doc["@type"]:
-            for subclass in cls.__subclasses__():
-                if subclass.__uri__ in doc["@type"]:
-                    assert issubclass(subclass, cls)
-                    return await subclass.__from_jsonld__(doc)
+            for doc_type in doc["@type"]:
+                entity_type = get_entity_type(Uri(doc_type))
+                if entity_type is not None and issubclass(entity_type, cls):
+                    return await entity_type.__from_jsonld__(doc)
             raise ValueError(
-                f"expected type {cls.__uri__!r}, got {doc['@type']!r}"
+                f"unsupported type: {doc['@type']!r}"
+                if cls is Entity
+                else f"expected type {cls.__uri__!r}, got {doc['@type']!r}"
             )
         values: dict[str, Any] = {}
         extra: dict[Uri, Any] = {}
@@ -203,6 +205,24 @@ class Entity:
             value_map["__extra__"] = self.__extra__
         args = ", ".join(f"{k}={v!r}" for (k, v) in value_map.items())
         return f"{cls.__name__}({args})"
+
+
+entity_types: dict[Uri, type[Entity]] = {}
+
+
+def get_entity_type(type_uri: Uri) -> Optional[type[Entity]]:
+    if not entity_types:
+
+        def collect_entity_types(cls: type[Entity]) -> None:
+            global entity_types
+            for subclass in cls.__subclasses__():
+                if subclass.__uri__ not in entity_types:
+                    entity_types[subclass.__uri__] = subclass
+            for subclass in cls.__subclasses__():
+                collect_entity_types(subclass)
+
+        collect_entity_types(Entity)
+    return entity_types.get(type_uri)
 
 
 descriptors: dict[type[Entity], Mapping[str, Property]] = {}

@@ -5,8 +5,23 @@ import pytest
 from fedikit.model.docloader import DocumentLoader
 from fedikit.model.entity import Entity, EntityRef, Uri, load_entity_refs
 from fedikit.vocab.activity import Activity
+from fedikit.vocab.document import Page
 from fedikit.vocab.link import Link
 from fedikit.vocab.object import Object
+
+
+@pytest.mark.asyncio
+async def test_entity_from_jsonld(document_loader: DocumentLoader) -> None:
+    page = await Entity.__from_jsonld__(
+        {
+            "@context": "https://www.w3.org/ns/activitystreams",
+            "type": "Page",
+            "name": "foo",
+        },
+        loader=document_loader,
+    )
+    assert isinstance(page, Page)
+    assert page == Page(name="foo")
 
 
 def test_entity_ref_uri():

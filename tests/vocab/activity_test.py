@@ -11,7 +11,9 @@ from fedikit.vocab.object import Object
 
 @pytest.mark.parametrize("cls", [Object, Activity])
 @pytest.mark.asyncio
-async def test_activity_from_jsonld(cls: type[Object]) -> None:
+async def test_activity_from_jsonld(
+    cls: type[Object], document_loader: DocumentLoader
+) -> None:
     parsed = await from_jsonld(
         cls,
         {
@@ -26,6 +28,7 @@ async def test_activity_from_jsonld(cls: type[Object]) -> None:
                 {"type": "Link", "as:href": "https://example.com/"},
             ],
         },
+        loader=document_loader,
     )
     assert parsed == Activity(
         attachments=[
