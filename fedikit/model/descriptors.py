@@ -271,7 +271,7 @@ class SingularProperty(ResourceProperty):
                 return EntityRef(v["@id"])
             for t in types:
                 try:
-                    return await from_jsonld(  # type: ignore
+                    return await from_jsonld(
                         t, v, loader=loader  # pyright: ignore
                     )
                 except ValueError:

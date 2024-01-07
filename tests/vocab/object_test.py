@@ -1,4 +1,7 @@
+from decimal import Decimal
+
 import pytest
+from isoduration.types import DateDuration, Duration, TimeDuration
 
 from fedikit.model.converters import from_jsonld, jsonld
 from fedikit.model.docloader import DocumentLoader
@@ -20,6 +23,7 @@ async def test_object_from_jsonld() -> None:
                 {"type": "Object", "name": "foo"},
                 {"type": "Link", "as:href": "https://example.com/"},
             ],
+            "duration": "P1DT2H",
         },
     )
     assert parsed == Object(
@@ -28,8 +32,12 @@ async def test_object_from_jsonld() -> None:
             Object(name="foo"),
             Link(href=Uri("https://example.com/")),
         ],
+        duration=Duration(
+            DateDuration(days=Decimal(1)), TimeDuration(hours=Decimal(2))
+        ),
     )
 
+    # Entity refs can be used as property values (nodes that have only @id):
     parsed2 = await from_jsonld(
         Object,
         {
@@ -169,6 +177,20 @@ async def test_object_names(document_loader: DocumentLoader) -> None:
         "@context": "https://www.w3.org/ns/activitystreams",
         "type": "Object",
         "nameMap": {"zh": "你好", "en": "Hello"},
+    }
+
+
+@pytest.mark.asyncio
+async def test_object_duration(document_loader: DocumentLoader) -> None:
+    duration = Duration(
+        DateDuration(days=Decimal(1)), TimeDuration(hours=Decimal(2))
+    )
+    obj = Object(duration=duration)
+    assert obj.duration == duration
+    assert await jsonld(obj, loader=document_loader) == {
+        "@context": "https://www.w3.org/ns/activitystreams",
+        "type": "Object",
+        "as:duration": "P1DT2H",
     }
 
 

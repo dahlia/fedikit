@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import Any, Mapping, NewType, Optional, TypeVar, Union
 
+from isoduration import format_duration, parse_duration
+from isoduration.types import Duration
 from langcodes import Language
 
 from .docloader import DocumentLoader
@@ -45,6 +47,8 @@ async def jsonld(
             }
         case Language():
             return {"@value": str(value)}
+        case Duration():
+            return {"@value": format_duration(value)}
     raise TypeError(f"cannot convert {type(value).__name__} to JSON-LD")
 
 
@@ -83,6 +87,8 @@ async def from_jsonld(
         return cls.fromisoformat(document["@value"])  # type: ignore
     elif issubclass(cls, Language):
         return Language.get(document["@value"])  # type: ignore
+    elif issubclass(cls, Duration):
+        return parse_duration(document["@value"])  # type: ignore
     raise ValueError(f"cannot convert JSON-LD to {cls.__name__}")
 
 

@@ -31,6 +31,7 @@ requires-python = ">= 3.12"
 dynamic = ["version"]
 
 dependencies = [
+  "isoduration ~= 20.11.0",
   "langcodes ~= 3.3.0",
   "PyLD[requests] ~= 2.0.3",
 ]
@@ -68,7 +69,7 @@ files = ["fedikit", "tests"]
 scripts_are_modules = true
 
 [[tool.mypy.overrides]]
-module = ["pyld.*"]
+module = ["isoduration.*", "pyld.*"]
 ignore_missing_imports = true
 
 [[tool.mypy.overrides]]
@@ -77,3 +78,6 @@ disallow_untyped_defs = false
 
 [tool.pytest.ini_options]
 addopts = "--mypy"
+filterwarnings = [
+  "ignore::DeprecationWarning:dateutil.tz.tz",
+]

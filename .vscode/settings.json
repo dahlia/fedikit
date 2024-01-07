@@ -28,6 +28,7 @@
     "docloader",
     "documentloader",
     "fedikit",
+    "isoduration",
     "isort",
     "jsonld",
     "langcodes",

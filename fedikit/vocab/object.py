@@ -2,6 +2,8 @@ from collections.abc import Sequence
 from datetime import datetime
 from typing import Union
 
+from isoduration.types import Duration
+
 from ..model.descriptors import id_property, plural_property, singular_property
 from ..model.entity import Entity, Uri
 from ..model.langstr import LanguageString
@@ -254,4 +256,16 @@ class Object(Entity):
     #: contain ``text/html`` content.
     mediaType: str = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#mediaType")
+    )
+
+    #: When the object describes a time-bound resource, such as an audio or
+    #: video, a meeting, etc, the :attr:`duration` property indicates
+    #: the object's approximate duration.  The value *must* be expressed as
+    #: an ``xsd:duration`` as defined by `W3C XML Schema Definition Language
+    #: (XSD) 1.1 Part 2: Datatypes`__, section 3.3.6 (e.g. a period of
+    #: 5 seconds is represented as "PT5S").
+    #:
+    #: __ https://www.w3.org/TR/xmlschema11-2/
+    duration: Duration = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#duration")
     )
