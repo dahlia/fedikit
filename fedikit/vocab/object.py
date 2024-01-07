@@ -183,6 +183,12 @@ class Object(Entity):
         Uri("https://www.w3.org/ns/activitystreams#published")
     )
 
+    #: Identifies a :class:`Collection` containing objects considered to be
+    #: responses to this object.
+    replies: "Collection" = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#replies")
+    )
+
     #: The date and time describing the actual or expected starting time of
     #: the object.  When used with an :class:`Activity` object, for instance,
     #: the :attr:`start_time` property specifies the moment the activity
@@ -295,4 +301,5 @@ class Object(Entity):
     )
 
 
+from .collection import Collection  # noqa: E402
 from .document import Image  # noqa: E402

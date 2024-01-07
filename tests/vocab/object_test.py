@@ -7,6 +7,7 @@ from fedikit.model.converters import from_jsonld, jsonld
 from fedikit.model.docloader import DocumentLoader
 from fedikit.model.entity import EntityRef, Uri
 from fedikit.model.langstr import LanguageString
+from fedikit.vocab.collection import Collection
 from fedikit.vocab.link import Link
 from fedikit.vocab.object import Object
 
@@ -24,6 +25,11 @@ async def test_object_from_jsonld() -> None:
                 {"type": "Link", "as:href": "https://example.com/"},
             ],
             "duration": "P1DT2H",
+            "replies": {
+                "type": "Collection",
+                "totalItems": 1,
+                "items": [{"name": "reply", "type": "Object"}],
+            },
         },
     )
     assert parsed == Object(
@@ -34,6 +40,10 @@ async def test_object_from_jsonld() -> None:
         ],
         duration=Duration(
             DateDuration(days=Decimal(1)), TimeDuration(hours=Decimal(2))
+        ),
+        replies=Collection(
+            total_items=1,
+            items=[Object(name="reply")],
         ),
     )
 
