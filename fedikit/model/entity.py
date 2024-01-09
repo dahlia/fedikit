@@ -65,18 +65,19 @@ class Entity:
                 {"documentLoader": doc_loader},
             )[0]
         )
-        if "@type" not in doc:
-            raise ValueError("missing '@type' in JSON-LD document")
-        elif cls is Entity or cls.__uri__ not in doc["@type"]:
-            for doc_type in doc["@type"]:
-                entity_type = get_entity_type(Uri(doc_type))
-                if entity_type is not None and issubclass(entity_type, cls):
-                    return await entity_type.__from_jsonld__(doc)
-            raise ValueError(
-                f"unsupported type: {doc['@type']!r}"
-                if cls is Entity
-                else f"expected type {cls.__uri__!r}, got {doc['@type']!r}"
-            )
+        if "@type" in doc:
+            if cls is Entity or cls.__uri__ not in doc["@type"]:
+                for doc_type in doc["@type"]:
+                    entity_type = get_entity_type(Uri(doc_type))
+                    if entity_type is not None and issubclass(
+                        entity_type, cls
+                    ):
+                        return await entity_type.__from_jsonld__(doc)
+                raise ValueError(
+                    f"unsupported type: {doc['@type']!r}"
+                    if cls is Entity
+                    else f"expected type {cls.__uri__!r}, got {doc['@type']!r}"
+                )
         values: dict[str, Any] = {}
         extra: dict[Uri, Any] = {}
         descriptors: Mapping[Uri, Mapping[str, Property]] = (
