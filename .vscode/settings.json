@@ -1,5 +1,8 @@
 {
   "flake8.importStrategy": "fromEnvironment",
+  "flake8.args": [
+    "--ignore=E501"
+  ],
   "python.languageServer": "Pylance",
   "python.analysis.typeCheckingMode": "basic",
   "[json]": {
@@ -40,6 +43,7 @@
     "pytest",
     "refurb",
     "rels",
+    "seealso",
     "subproperties",
     "subproperty"
   ]

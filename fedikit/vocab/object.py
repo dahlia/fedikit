@@ -309,6 +309,23 @@ class Object(Entity):
         Uri("https://www.w3.org/ns/activitystreams#duration")
     )
 
+    #: The ``sensitive`` property on an object indicates that
+    #: some users may wish to apply discretion about viewing its content,
+    #: whether due to nudity, violence, or any other likely aspects that
+    #: viewers may be sensitive to.  This is comparable to what is popularly
+    #: called "NSFW" (Not Safe For Work) or "trigger warning" in some systems.
+    #: Implementations may choose to hide content flagged with this property
+    #: by default, exposed at user discretion.
+    #:
+    #: .. seealso::
+    #:
+    #:    Proposed extensions --- `as:sensitive property`__
+    #:
+    #:    __ https://www.w3.org/wiki/Activity_Streams_extensions#as:sensitive_property
+    sensitive: bool = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#sensitive")
+    )
+
 
 class Article(Object):
     """Represents any kind of multi-paragraph written work."""
@@ -479,6 +496,20 @@ class Tombstone(Object):
     deleted: datetime = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#deleted")
     )
+
+
+class Hashtag(Object):
+    """The ``Hashtag`` is an object type, subclass of :class:`Object`,
+    which is used for hashtag-style tags under the :attr:`tag` property.
+
+    .. seealso::
+
+        Proposed extensions --- `as:Hashtag type`__
+
+        __ https://www.w3.org/wiki/Activity_Streams_extensions#as:Hashtag_type
+    """
+
+    __uri__ = Uri("https://www.w3.org/ns/activitystreams#Hashtag")
 
 
 from .collection import Collection  # noqa: E402
