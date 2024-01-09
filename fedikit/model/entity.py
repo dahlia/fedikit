@@ -49,6 +49,9 @@ class Entity:
     #: the JSON-LD document.
     __default_context__: ClassVar[Uri | Sequence[Uri] | Mapping[str, Any]]
 
+    #: Whether the type is abstract.  Abstract types cannot be instantiated.
+    __abstract__: ClassVar[bool] = True
+
     _values: Mapping[Uri, Slot]
     __extra__: Mapping[Uri, Any]
 
@@ -66,7 +69,7 @@ class Entity:
             )[0]
         )
         if "@type" in doc:
-            if cls is Entity or cls.__uri__ not in doc["@type"]:
+            if cls.__abstract__ or cls.__uri__ not in doc["@type"]:
                 for doc_type in doc["@type"]:
                     entity_type = get_entity_type(Uri(doc_type))
                     if entity_type is not None and issubclass(
@@ -75,7 +78,7 @@ class Entity:
                         return await entity_type.__from_jsonld__(doc)
                 raise ValueError(
                     f"unsupported type: {doc['@type']!r}"
-                    if cls is Entity
+                    if cls.__abstract__
                     else f"expected type {cls.__uri__!r}, got {doc['@type']!r}"
                 )
         values: dict[str, Any] = {}
@@ -110,6 +113,10 @@ class Entity:
         __extra__: Mapping[Uri, Any] = {},  # noqa: B006
         **kwargs: Mapping[str, Any],
     ) -> None:
+        if type(self).__abstract__:
+            raise TypeError(
+                f"cannot instantiate abstract type {type(self).__name__}"
+            )
         values: dict[Uri, Slot] = {}
         props: dict[Uri, str] = {}
         cls = type(self)

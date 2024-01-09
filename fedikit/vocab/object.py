@@ -29,6 +29,7 @@ class Object(Entity):
     :class:`OrderedCollection`.
     """
 
+    __abstract__ = False
     __uri__ = Uri("https://www.w3.org/ns/activitystreams#Object")
     __default_context__ = Uri("https://www.w3.org/ns/activitystreams")
 

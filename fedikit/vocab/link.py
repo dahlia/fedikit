@@ -23,6 +23,7 @@ class Link(Entity):
     __ http://patterns.dataincubator.org/book/qualified-relation.html
     """
 
+    __abstract__ = False
     __uri__ = Uri("https://www.w3.org/ns/activitystreams#Link")
     __default_context__ = Uri("https://www.w3.org/ns/activitystreams")
 

@@ -64,7 +64,7 @@ preview = true
 
 [tool.flake8]
 max-line-length = 79
-extend-ignore = ["E501"]
+extend-ignore = ["E501", "E704", "W503"]
 
 [tool.isort]
 profile = "black"

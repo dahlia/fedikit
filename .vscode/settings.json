@@ -1,7 +1,7 @@
 {
   "flake8.importStrategy": "fromEnvironment",
   "flake8.args": [
-    "--ignore=E501"
+    "--ignore=E501,E704,W503"
   ],
   "python.languageServer": "Pylance",
   "python.analysis.typeCheckingMode": "basic",
