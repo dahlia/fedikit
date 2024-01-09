@@ -34,6 +34,7 @@ from .collection import (
     OrderedCollectionPage,
 )
 from .document import Audio, Document, Image, Page, Video
+from .intransitive_activity import Arrive, IntransitiveActivity, Question
 from .link import Link, Mention
 from .object import (
     Article,
@@ -53,6 +54,7 @@ __all__ = [
     "Add",
     "Announce",
     "Application",
+    "Arrive",
     "Article",
     "Audio",
     "Block",
@@ -68,6 +70,7 @@ __all__ = [
     "Group",
     "Ignore",
     "Image",
+    "IntransitiveActivity",
     "Invite",
     "Join",
     "Leave",
@@ -86,6 +89,7 @@ __all__ = [
     "Person",
     "Place",
     "Profile",
+    "Question",
     "Read",
     "Reject",
     "Relationship",
