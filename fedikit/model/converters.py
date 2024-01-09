@@ -40,6 +40,11 @@ async def jsonld(
                     else "http://www.w3.org/2001/XMLSchema#nonNegativeInteger"
                 ),
             }
+        case float():
+            return {
+                "@value": value,
+                "@type": "http://www.w3.org/2001/XMLSchema#float",
+            }
         case datetime():
             return {
                 "@type": "http://www.w3.org/2001/XMLSchema#dateTime",
@@ -82,6 +87,8 @@ async def from_jsonld(
     elif issubclass(cls, (str, bool)):
         return cls(document["@value"])  # type: ignore
     elif issubclass(cls, int):
+        return cls(document["@value"])  # type: ignore
+    elif issubclass(cls, float):
         return cls(document["@value"])  # type: ignore
     elif issubclass(cls, datetime):
         return cls.fromisoformat(document["@value"])  # type: ignore

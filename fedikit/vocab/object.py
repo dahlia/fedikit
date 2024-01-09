@@ -339,6 +339,38 @@ class Place(Object):
 
     __uri__ = Uri("https://www.w3.org/ns/activitystreams#Place")
 
+    #: Indicates the accuracy of position coordinates on a :class:`Place`
+    #: objects.  Expressed in properties of percentage. e.g. "94.0" means
+    #: "94.0% accurate".
+    accuracy: float = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#accuracy")
+    )
+
+    #: Indicates the altitude of a place.  The measurement units is indicated
+    #: using the :attr:`units` property.  If :attr:`units` is not specified,
+    #: the default is assumed to be "``m``" indicating meters.
+    altitude: float = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#altitude")
+    )
+
+    #: The latitude of a place.
+    latitude: float = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#latitude")
+    )
+
+    #: The longitude of a place.
+    longitude: float = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#longitude")
+    )
+
+    #: The radius from the given latitude and longitude for a :class:`Place`.
+    #: The units is expressed by the :attr:`units` property.  If :attr:`units`
+    #: is not specified, the default is assumed to be "``m``" indicating
+    #: "meters".
+    radius: float = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#radius")
+    )
+
     #: Specifies the measurement units for the :attr:`radius` and
     #: :attr:`altitude` properties on a :class:`Place` object.
     #: If not specified, the default is assumed to be "``m``" for "meters".

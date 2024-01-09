@@ -10,5 +10,5 @@ __all__ = ["ScalarValue"]
 
 #: A type alias for scalar values.
 ScalarValue: TypeAlias = (
-    str | int | bool | datetime | Language | LanguageString | Duration
+    str | int | float | bool | datetime | Language | LanguageString | Duration
 )

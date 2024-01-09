@@ -275,18 +275,24 @@ async def test_place_from_jsonld() -> None:
         {
             "@context": "https://www.w3.org/ns/activitystreams",
             "type": "Place",
+            "latitude": 35.1483528,
+            "longitude": 126.9161773,
             "units": "miles",
         },
     )
-    assert parsed == Place(units="miles")
+    assert parsed == Place(
+        latitude=35.1483528, longitude=126.9161773, units="miles"
+    )
 
 
 @pytest.mark.asyncio
-async def test_place_units(document_loader: DocumentLoader) -> None:
-    place = Place(units="cm")
+async def test_place_properties(document_loader: DocumentLoader) -> None:
+    place = Place(latitude=35.1483528, longitude=126.9161773, units="cm")
     assert place.units == "cm"
     assert await jsonld(place, loader=document_loader) == {
         "@context": "https://www.w3.org/ns/activitystreams",
         "type": "Place",
+        "latitude": 35.1483528,
+        "longitude": 126.9161773,
         "units": "cm",
     }
