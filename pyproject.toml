@@ -1,10 +1,16 @@
 [project]
 name = "FediKit"
 description = "A Pythonic interface to the Fediverse"
-# readme = "README.rst"
-keywords = ["activitypub", "fediverse", "social media", "federation"]
+readme = "README.rst"
+keywords = [
+  "activitypub",
+  "activitystreams",
+  "federation",
+  "fediverse",
+  "social media",
+]
 classifiers = [
-  "Development Status :: 1 - Planning",
+  "Development Status :: 2 - Pre-Alpha",
   "Environment :: Web Environment",
   "Intended Audience :: Developers",
   "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",

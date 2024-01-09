@@ -6,6 +6,7 @@
     "tamasfe.even-better-toml",
     "ms-python.black-formatter",
     "ms-python.isort",
-    "ms-python.flake8"
+    "ms-python.flake8",
+    "trond-snekvik.simple-rst"
   ]
 }
