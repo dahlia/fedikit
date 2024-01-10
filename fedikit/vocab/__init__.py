@@ -26,7 +26,15 @@ from .activity import (
     Update,
     View,
 )
-from .actor import Actor, Application, Group, Organization, Person, Service
+from .actor import (
+    Actor,
+    Application,
+    Endpoints,
+    Group,
+    Organization,
+    Person,
+    Service,
+)
 from .collection import (
     Collection,
     CollectionPage,
@@ -64,6 +72,7 @@ __all__ = [
     "Delete",
     "Dislike",
     "Document",
+    "Endpoints",
     "Event",
     "Flag",
     "Follow",

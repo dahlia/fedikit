@@ -310,6 +310,80 @@ class Object(Entity):
         Uri("https://www.w3.org/ns/activitystreams#duration")
     )
 
+    #: The ``source`` property is intended to convey some sort of source from
+    #: which the :attr:`content` markup was derived, as a form of provenance,
+    #: or to support future editing by clients.  In general, clients do
+    #: the conversion from ``source`` to :attr:`content`,
+    #: not the other way around.
+    #:
+    #: The value of ``source`` is itself an object which uses its own
+    # :attr:`content` and :attr:`mediaType` fields to supply source information.
+    #:
+    #: .. seealso::
+    #:
+    #:    ActivityPub --- `3.3 The source property`__
+    #:
+    #:    __ https://www.w3.org/TR/activitypub/#source-property
+    source: "Object" = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#source")
+    )
+
+    #: Plural accessor for :attr:`source`.
+    sources: Sequence["Object"] = plural_property(
+        Uri("https://www.w3.org/ns/activitystreams#source")
+    )
+
+    #: This is a list of all :class:`Like` activities with this object as
+    #: the ``object`` property, added as a `side effect`__.  The ``likes``
+    #: collection *must* be either an :class:`OrderedCollection` or
+    #: a :class:`Collection` and *may* be filtered on privileges of
+    #: an authenticated user or as appropriate when no authentication is given.
+    #:
+    #: __ https://www.w3.org/TR/activitypub/#like-activity-inbox
+    #:
+    #: .. note::
+    #:
+    #:    Care should be taken to not confuse the the :attr:`likes` collection
+    #:    with the similarly named but different :attr:`~.actor.Actor.liked`
+    #:    collection.  In sum:
+    #:
+    #:    - *liked*: Specifically a property of actors.  This is a collection
+    #:      of :class:`Like` activities performed by the actor, added to
+    #:      the collection as a `side effect of delivery to the outbox`__.
+    #:
+    #:    - *likes*:  May be a property of any object.  This is a collection
+    #:      of :class:`Like` activities referencing this object, added to
+    #:      the collection as a `side effect of delivery to the inbox`__.
+    #:
+    #:    __ https://www.w3.org/TR/activitypub/#like-activity-outbox
+    #:    __ https://www.w3.org/TR/activitypub/#like-activity-inbox
+    #:
+    #: .. seealso::
+    #:
+    #:    ActivityPub --- `5.7 Likes Collection`__
+    #:
+    #:    __ https://www.w3.org/TR/activitypub/#likes
+    likes: "Collection" = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#likes")
+    )
+
+    #: This is a list of all :class:`Announce` activities with this object as
+    #: the ``object`` property, added as a `side effect`__.  The ``shares``
+    #: collection *must* be either an :class:`OrderedCollection` or
+    #: a :class:`Collection` and *may* be filtered on privileges of
+    #: an authenticated user or as appropriate when no authentication is given.
+    #:
+    #: __ https://www.w3.org/TR/activitypub/#announce-activity-inbox
+    #:
+    #: .. seealso::
+    #:
+    #:    ActivityPub --- `5.8 Shares Collection`__
+    #:
+    #:    __ https://www.w3.org/TR/activitypub/#shares
+    shares: "Collection" = singular_property(
+        Uri("https://www.w3.org/ns/activitystreams#shares")
+    )
+
     #: The ``sensitive`` property on an object indicates that
     #: some users may wish to apply discretion about viewing its content,
     #: whether due to nudity, violence, or any other likely aspects that
