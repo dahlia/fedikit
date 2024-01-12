@@ -4,8 +4,9 @@ from typing import Union
 from langcodes import Language
 
 from ..model.descriptors import id_property, plural_property, singular_property
-from ..model.entity import Entity, Uri
+from ..model.entity import Entity
 from ..model.langstr import LanguageString
+from ..uri import Uri
 
 __all__ = ["Link", "Mention"]
 

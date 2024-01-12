@@ -3,7 +3,7 @@ from langcodes import Language
 
 from fedikit.model.converters import from_jsonld, jsonld
 from fedikit.model.docloader import DocumentLoader
-from fedikit.model.entity import Uri
+from fedikit.uri import Uri
 from fedikit.vocab.link import Link
 from fedikit.vocab.object import Object
 

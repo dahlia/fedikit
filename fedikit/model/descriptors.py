@@ -6,11 +6,12 @@ from inspect import currentframe
 from types import GenericAlias, UnionType
 from typing import Any, ForwardRef, NewType, Optional, Self, Union
 
+from ..uri import Uri
 from .converters import from_jsonld
 from .docloader import DocumentLoader
 
 if typing.TYPE_CHECKING:
-    from .entity import Entity, EntityRef, Slot, Uri
+    from .entity import Entity, EntityRef, Slot
     from .scalars import ScalarValue
 
 __all__ = [
@@ -59,8 +60,6 @@ class Property(ABC):
 class IdProperty(Property):
     @property
     def uri(self) -> "Uri":
-        from .entity import Uri
-
         return Uri("@id")
 
     def __get__(
@@ -71,8 +70,6 @@ class IdProperty(Property):
         return instance._values["@id"]  # type: ignore
 
     def normalize(self, value: Any) -> "Slot":
-        from .entity import Uri
-
         assert isinstance(value, str)
         return Uri(value)
 
@@ -151,8 +148,6 @@ class PluralProperty(ResourceProperty):
         "Entity",
         Sequence[Union["EntityRef", "ScalarValue", "Entity"]],
     ]:
-        from .entity import Uri
-
         if not (
             isinstance(
                 type_,
@@ -243,8 +238,6 @@ class SingularProperty(ResourceProperty):
         "Entity",
         Sequence[Union["EntityRef", "ScalarValue", "Entity"]],
     ]:
-        from .entity import Uri
-
         if isinstance(type_, UnionType):
             types = list(type_.__args__)
         elif (

@@ -1,4 +1,4 @@
-from ..model.entity import Uri
+from ..uri import Uri
 from .object import Object
 
 __all__ = ["Audio", "Document", "Image", "Page", "Video"]

@@ -4,7 +4,7 @@ import pytest
 from langcodes import Language
 
 from fedikit.model.converters import from_jsonld, jsonld
-from fedikit.model.entity import Uri
+from fedikit.uri import Uri
 
 
 @pytest.mark.asyncio

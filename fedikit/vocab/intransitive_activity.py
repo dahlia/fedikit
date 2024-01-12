@@ -2,7 +2,7 @@ from collections.abc import Sequence
 from datetime import datetime
 
 from ..model.descriptors import plural_property, singular_property
-from ..model.entity import Uri
+from ..uri import Uri
 from .activity import Activity
 from .link import Link
 from .object import Object

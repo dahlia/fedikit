@@ -1,8 +1,9 @@
 from collections.abc import Sequence
 
 from ..model.descriptors import plural_property, singular_property
-from ..model.entity import Entity, Uri
+from ..model.entity import Entity
 from ..model.langstr import LanguageString
+from ..uri import Uri
 from .collection import Collection, OrderedCollection
 from .object import Object
 

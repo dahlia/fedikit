@@ -2,7 +2,7 @@ import pytest
 
 from fedikit.model.converters import from_jsonld, jsonld
 from fedikit.model.docloader import DocumentLoader
-from fedikit.model.entity import Uri
+from fedikit.uri import Uri
 from fedikit.vocab.activity import Activity
 from fedikit.vocab.actor import Person
 from fedikit.vocab.link import Link

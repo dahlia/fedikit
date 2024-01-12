@@ -3,7 +3,6 @@ from collections.abc import Iterable, Mapping, MutableSequence, Sequence
 from typing import (
     Any,
     ClassVar,
-    NewType,
     Optional,
     Self,
     TypeAlias,
@@ -17,15 +16,13 @@ from typing import (
 from pyld import jsonld
 from pyld.documentloader.requests import requests_document_loader
 
+from ..uri import Uri
 from .converters import jsonld as to_jsonld
 from .descriptors import Property, SingularProperty
 from .docloader import DocumentLoader
 from .scalars import ScalarValue
 
-__all__ = ["Entity", "EntityRef", "Slot", "Uri", "load_entity_refs"]
-
-
-Uri = NewType("Uri", str)
+__all__ = ["Entity", "EntityRef", "Slot", "load_entity_refs"]
 
 
 Slot: TypeAlias = (

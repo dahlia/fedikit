@@ -5,8 +5,9 @@ from typing import Literal, Union
 from isoduration.types import Duration
 
 from ..model.descriptors import id_property, plural_property, singular_property
-from ..model.entity import Entity, Uri
+from ..model.entity import Entity
 from ..model.langstr import LanguageString
+from ..uri import Uri
 from .link import Link
 
 __all__ = [

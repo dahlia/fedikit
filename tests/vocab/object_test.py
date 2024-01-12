@@ -5,8 +5,9 @@ from isoduration.types import DateDuration, Duration, TimeDuration
 
 from fedikit.model.converters import from_jsonld, jsonld
 from fedikit.model.docloader import DocumentLoader
-from fedikit.model.entity import EntityRef, Uri
+from fedikit.model.entity import EntityRef
 from fedikit.model.langstr import LanguageString
+from fedikit.uri import Uri
 from fedikit.vocab.collection import Collection
 from fedikit.vocab.link import Link
 from fedikit.vocab.object import Object, Place

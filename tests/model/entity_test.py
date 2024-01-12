@@ -3,7 +3,8 @@ from typing import Any
 import pytest
 
 from fedikit.model.docloader import DocumentLoader
-from fedikit.model.entity import Entity, EntityRef, Uri, load_entity_refs
+from fedikit.model.entity import Entity, EntityRef, load_entity_refs
+from fedikit.uri import Uri
 from fedikit.vocab.activity import Activity
 from fedikit.vocab.document import Page
 from fedikit.vocab.link import Link
