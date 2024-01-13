@@ -64,6 +64,8 @@ async def test_object_from_jsonld() -> None:
     assert isinstance(parsed2, Object)
     assert parsed2.name == "foo"
     assert parsed2.attachments == [Link(href=Uri("https://example.com/"))]
+    assert parsed2.duration is None
+    assert parsed2.replies is None
 
     # Object lacking @type is treated as a generic object:
     parsed3 = await from_jsonld(
@@ -72,6 +74,9 @@ async def test_object_from_jsonld() -> None:
     )
     assert isinstance(parsed3, Object)
     assert parsed3.name == "foo"
+    assert parsed3.attachments == []
+    assert parsed3.duration is None
+    assert parsed3.replies is None
 
 
 @pytest.mark.asyncio

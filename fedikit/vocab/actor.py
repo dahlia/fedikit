@@ -1,4 +1,5 @@
 from collections.abc import Sequence
+from typing import Optional
 
 from ..model.descriptors import plural_property, singular_property
 from ..model.entity import Entity
@@ -45,7 +46,7 @@ class Actor(Object):
     #:    ActivityPub --- `5.2 Inbox`__
     #:
     #:    __ https://www.w3.org/TR/activitypub/#inbox
-    inbox: OrderedCollection = singular_property(
+    inbox: Optional[OrderedCollection] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#inbox")
     )
 
@@ -66,7 +67,7 @@ class Actor(Object):
     #:    ActivityPub --- `5.1 Outbox`__
     #:
     #:    __ https://www.w3.org/TR/activitypub/#outbox
-    outbox: OrderedCollection = singular_property(
+    outbox: Optional[OrderedCollection] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#outbox")
     )
 
@@ -83,7 +84,7 @@ class Actor(Object):
     #:    ActivityPub --- `5.4 Following Collection`__
     #:
     #:    __ https://www.w3.org/TR/activitypub/#following
-    following: Collection = singular_property(
+    following: Optional[Collection] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#following")
     )
 
@@ -101,7 +102,7 @@ class Actor(Object):
     #:    ActivityPub --- `5.3 Followers Collection`__
     #:
     #:    __ https://www.w3.org/TR/activitypub/#followers
-    followers: Collection = singular_property(
+    followers: Optional[Collection] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#followers")
     )
 
@@ -118,7 +119,7 @@ class Actor(Object):
     #:    ActivityPub --- `5.5 Liked Collection`__
     #:
     #:    __ https://www.w3.org/TR/activitypub/#liked
-    liked: Collection = singular_property(
+    liked: Optional[Collection] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#liked")
     )
 
@@ -141,7 +142,7 @@ class Actor(Object):
     #:    ActivityPub --- `4.1 Actor objects`__
     #:
     #:    __ https://www.w3.org/TR/activitypub/#actor-objects
-    preferred_username: str | LanguageString = singular_property(
+    preferred_username: Optional[str | LanguageString] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#preferredUsername")
     )
 
@@ -156,7 +157,7 @@ class Actor(Object):
     #:    ActivityPub --- `4.1 Actor objects`__
     #:
     #:    __ https://www.w3.org/TR/activitypub/#actor-objects
-    endpoints: "Endpoints" = singular_property(
+    endpoints: Optional["Endpoints"] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#endpoints")
     )
 
@@ -172,7 +173,7 @@ class Actor(Object):
     #:    Proposed extensions --- `as:manuallyApprovesFollowers`__
     #:
     #:    __ https://www.w3.org/wiki/Activity_Streams_extensions#as:manuallyApprovesFollowers
-    manually_approves_followers: bool = singular_property(
+    manually_approves_followers: Optional[bool] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#manuallyApprovesFollowers")
     )
 
@@ -229,7 +230,7 @@ class Endpoints(Entity):
     #: objects which require authentication to access.  To use this endpoint,
     #: the client posts an ``x-www-form-urlencoded`` ``id`` parameter with
     #: the value being the ``id`` of the requested ActivityStreams object.
-    proxy_url: Uri = singular_property(
+    proxy_url: Optional[Uri] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#proxyUrl")
     )
 
@@ -239,7 +240,7 @@ class Endpoints(Entity):
     #: a new authorization grant.
     #:
     #: __ https://www.w3.org/TR/activitypub/#client-to-server-interactions
-    oauth_authorization_endpoint: Uri = singular_property(
+    oauth_authorization_endpoint: Optional[Uri] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#oauthAuthorizationEndpoint")
     )
 
@@ -248,7 +249,7 @@ class Endpoints(Entity):
     #: a URI at which a client may acquire an access token.
     #:
     #: __ https://www.w3.org/TR/activitypub/#client-to-server-interactions
-    oauth_token_endpoint: Uri = singular_property(
+    oauth_token_endpoint: Optional[Uri] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#oauthTokenEndpoint")
     )
 
@@ -258,7 +259,7 @@ class Endpoints(Entity):
     #: `client to server interactions`__.
     #:
     #: __ https://www.w3.org/TR/activitypub/#client-to-server-interactions
-    provide_client_key: Uri = singular_property(
+    provide_client_key: Optional[Uri] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#provideClientKey")
     )
 
@@ -266,7 +267,7 @@ class Endpoints(Entity):
     #: authentication and authorization, this endpoint specifies a URI at which
     #: a client key may be signed by the actor's key for a time window to act
     #: on behalf of the actor in interacting with foreign servers.
-    sign_client_key: Uri = singular_property(
+    sign_client_key: Optional[Uri] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#signClientKey")
     )
 
@@ -280,6 +281,6 @@ class Endpoints(Entity):
     #:
     #: __ https://www.w3.org/TR/activitypub/#shared-inbox-delivery
     #: __ https://www.w3.org/TR/activitypub/#public-addressing
-    shared_box: Uri = singular_property(
+    shared_box: Optional[Uri] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#sharedInbox")
     )

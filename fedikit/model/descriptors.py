@@ -127,7 +127,7 @@ class PluralProperty(ResourceProperty):
 
         values = []
         for uri in (self.uri, *self.subproperties):
-            for v in instance._values[uri]:
+            for v in instance._values.get(uri, []):
                 if isinstance(v, EntityRef):
                     continue
                 values.append(v)
@@ -215,7 +215,7 @@ class SingularProperty(ResourceProperty):
         from .entity import EntityRef
 
         for uri in (self.uri, *self.subproperties):
-            for v in instance._values[uri]:
+            for v in instance._values.get(uri, []):
                 if not isinstance(v, EntityRef):
                     return v
         return None

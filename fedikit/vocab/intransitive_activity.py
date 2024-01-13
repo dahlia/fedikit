@@ -1,5 +1,6 @@
 from collections.abc import Sequence
 from datetime import datetime
+from typing import Optional
 
 from ..model.descriptors import plural_property, singular_property
 from ..uri import Uri
@@ -58,7 +59,7 @@ class Question(IntransitiveActivity):
 
     #: Indicates that a question has been closed, and answers are no longer
     #: accepted.
-    closed: Object | Link | datetime | bool = singular_property(
+    closed: Optional[Object | Link | datetime | bool] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#closed")
     )
 

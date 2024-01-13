@@ -100,8 +100,8 @@ async def test_load_entity_refs(document_loader: DocumentLoader) -> None:
     assert act.object is None
 
     act2 = Activity(
-        attachment=EntityRef("https://example.com/foo"),  # pyright: ignore
-        object=EntityRef("https://example.com/bar"),  # pyright: ignore
+        attachment=EntityRef("https://example.com/foo"),  # type: ignore
+        object=EntityRef("https://example.com/bar"),  # type: ignore
     )
     assert act2.attachment is None
     assert act2.object is None

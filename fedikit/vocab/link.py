@@ -1,5 +1,5 @@
 from collections.abc import Sequence
-from typing import Union
+from typing import Optional, Union
 
 from langcodes import Language
 
@@ -32,7 +32,7 @@ class Link(Entity):
     id: Uri = id_property()
 
     #: The target resource pointed to by a :class:`Link`.
-    href: Uri = singular_property(
+    href: Optional[Uri] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#href")
     )
 
@@ -44,7 +44,7 @@ class Link(Entity):
     #: characters can be used as a valid link relation.
     #:
     #: .. _HTML5: https://www.w3.org/TR/html5/
-    rel: str = singular_property(
+    rel: Optional[str] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#rel")
     )
 
@@ -54,14 +54,14 @@ class Link(Entity):
     )
 
     #: Identifies the MIME media type of the referenced resource.
-    media_type: str = singular_property(
+    media_type: Optional[str] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#mediaType")
     )
 
     #: A simple, human-readable, plain-text name for the object.
     #: HTML markup *must not* be included.
     #: The name *may* be expressed using multiple language-tagged values.
-    name: str | LanguageString = singular_property(
+    name: Optional[str | LanguageString] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#name")
     )
 
@@ -74,24 +74,24 @@ class Link(Entity):
     #: BCP47_ Language-Tag.
     #:
     #: .. _BCP47: https://tools.ietf.org/html/bcp47
-    hreflang: Language = singular_property(
+    hreflang: Optional[Language] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#hreflang")
     )
 
     #: On a :class:`Link`, specifies a hint as to the rendering height in
     #: device-independent pixels of the linked resource.
-    height: int = singular_property(
+    height: Optional[int] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#height")
     )
 
     #: On a :class:`Link`, specifies a hint as to the rendering width in
     #: device-independent pixels of the linked resource.
-    width: int = singular_property(
+    width: Optional[int] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#width")
     )
 
     #: Identifies an entity that provides a preview of this object.
-    preview: Union["Link", "Object"] = singular_property(
+    preview: Optional[Union["Link", "Object"]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#preview")
     )
 

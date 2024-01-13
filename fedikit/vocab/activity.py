@@ -1,5 +1,5 @@
 from collections.abc import Sequence
-from typing import Union
+from typing import Optional
 
 from ..model.descriptors import plural_property, singular_property
 from ..uri import Uri
@@ -51,25 +51,25 @@ class Activity(Object):
     #: perform the activity.  Any single activity can have multiple
     #: ``actor``\ s.  The ``actor`` *may* be specified using an indirect
     #: :class:`Link`.
-    actor: Union["Object", Link] = singular_property(
+    actor: Optional[Object | Link] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#actor")
     )
 
     #: Plural accessor for :attr:`actor`.
-    actors: Sequence[Union["Object", Link]] = plural_property(
+    actors: Sequence[Object | Link] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#actor")
     )
 
     #: Identifies one or more entities to which this object is attributed.
     #: The attributed entities might not be :class:`Actor`\ s.  For instance,
     #: an object might be attributed to the completion of another activity.
-    attributed_to: Union["Object", Link] = singular_property(
+    attributed_to: Optional[Object | Link] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#attributedTo"),
         subproperties=[Uri("https://www.w3.org/ns/activitystreams#actor")],
     )
 
     #: Plural accessor for :attr:`attributed_to`.
-    attributed_tos: Sequence[Union["Object", Link]] = plural_property(
+    attributed_tos: Sequence[Object | Link] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#attributedTo"),
         subproperties=[Uri("https://www.w3.org/ns/activitystreams#actor")],
     )
@@ -77,7 +77,7 @@ class Activity(Object):
     #: Describes the direct object of the activity.  For instance, in the
     #: activity "John added a movie to his wishlist", the object of
     #: the activity is the movie added.
-    object: Object | Link = singular_property(
+    object: Optional[Object | Link] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#object")
     )
 
@@ -92,7 +92,7 @@ class Activity(Object):
     #: For instance, in the activity "John added a movie to his wishlist",
     #: the target of the activity is John's wishlist.  An activity can have
     #: more than one target.
-    target: Object | Link = singular_property(
+    target: Optional[Object | Link] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#target")
     )
 
@@ -104,7 +104,7 @@ class Activity(Object):
     #: Describes the result of the activity.  For instance, if a particular
     #: action results in the creation of a new resource, the result property
     #: can be used to describe that new resource.
-    result: Object | Link = singular_property(
+    result: Optional[Object | Link] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#result")
     )
 
@@ -118,7 +118,7 @@ class Activity(Object):
     #: the English preposition "from".  For instance, in the activity
     #: "John moved an item to List B from List A", the origin of the activity
     #: is "List A".
-    origin: Object | Link = singular_property(
+    origin: Optional[Object | Link] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#origin")
     )
 
@@ -129,7 +129,7 @@ class Activity(Object):
 
     #: Identifies one or more objects used (or to be used) in the completion of
     #: an :class:`Activity`.
-    instrument: Object | Link = singular_property(
+    instrument: Optional[Object | Link] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#instrument")
     )
 

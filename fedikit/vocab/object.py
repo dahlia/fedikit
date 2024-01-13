@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 from datetime import datetime
-from typing import Literal, Union
+from typing import Literal, Optional, Union
 
 from isoduration.types import Duration
 
@@ -40,7 +40,7 @@ class Object(Entity):
     #: Identifies a resource attached or related to an object that potentially
     #: requires special handling.  The intent is to provide a model that is
     #: at least semantically similar to attachments in email.
-    attachment: Union["Object", Link] = singular_property(
+    attachment: Optional[Union["Object", Link]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#attachment")
     )
 
@@ -52,7 +52,7 @@ class Object(Entity):
     #: Identifies one or more entities to which this object is attributed.
     #: The attributed entities might not be :class:`Actor`\ s.  For instance,
     #: an object might be attributed to the completion of another activity.
-    attributed_to: Union["Object", Link] = singular_property(
+    attributed_to: Optional[Union["Object", Link]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#attributedTo")
     )
 
@@ -63,7 +63,7 @@ class Object(Entity):
 
     #: Identifies one or more entities that represent the total population of
     #: entities for which the object can considered to be relevant.
-    audience: Union["Object", Link] = singular_property(
+    audience: Optional[Union["Object", Link]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#audience")
     )
 
@@ -78,7 +78,7 @@ class Object(Entity):
     #: a different content type.
     #:
     #: The content *may* be expressed using multiple language-tagged values.
-    content: str | LanguageString = singular_property(
+    content: Optional[str | LanguageString] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#content")
     )
 
@@ -94,7 +94,7 @@ class Object(Entity):
     #: function is to serve as a means of grouping objects and activities that
     #: share a common originating context or purpose. An example could be
     #: all activities relating to a common project or event.
-    context: Union["Object", Link] = singular_property(
+    context: Optional[Union["Object", Link]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#context")
     )
 
@@ -106,7 +106,7 @@ class Object(Entity):
     #: A simple, human-readable, plain-text name for the object.
     #: HTML markup *must not* be included.
     #: The name *may* be expressed using multiple language-tagged values.
-    name: str | LanguageString = singular_property(
+    name: Optional[str | LanguageString] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#name")
     )
 
@@ -119,12 +119,12 @@ class Object(Entity):
     #: the object.  When used with an :class:`Activity` object, for instance,
     #: the :attr:`end_time` property specifies the moment the activity
     #: concluded or is expected to conclude.
-    end_time: datetime = singular_property(
+    end_time: Optional[datetime] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#endTime")
     )
 
     #: Identifies the entity (e.g. an application) that generated the object.
-    generator: Union["Object", Link] = singular_property(
+    generator: Optional[Union["Object", Link]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#generator")
     )
 
@@ -136,7 +136,7 @@ class Object(Entity):
     #: Indicates an entity that describes an icon for this object.
     #: The image should have an aspect ratio of one (horizontal) to
     #: one (vertical) and should be suitable for presentation at a small size.
-    icon: Union["Image", Link] = singular_property(
+    icon: Optional[Union["Image", Link]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#icon")
     )
 
@@ -148,7 +148,7 @@ class Object(Entity):
     #: Indicates an entity that describes an image for this object.
     #: Unlike the :attr:`icon` property, there are no aspect ratio or display
     #: size limitations assumed.
-    image: Union["Image", Link] = singular_property(
+    image: Optional[Union["Image", Link]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#image")
     )
 
@@ -159,7 +159,7 @@ class Object(Entity):
 
     #: Indicates one or more entities for which this object is considered
     #: a response.
-    in_reply_to: Union["Object", Link] = singular_property(
+    in_reply_to: Optional[Union["Object", Link]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#inReplyTo")
     )
 
@@ -170,7 +170,7 @@ class Object(Entity):
 
     #: Indicates one or more physical or logical locations associated with
     #: the object.
-    location: Union["Object", Link] = singular_property(
+    location: Optional[Union["Object", Link]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#location")
     )
 
@@ -180,23 +180,23 @@ class Object(Entity):
     )
 
     #: Identifies an entity that provides a preview of this object.
-    preview: Union["Link", "Object"] = singular_property(
+    preview: Optional[Union[Link, "Object"]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#preview")
     )
 
     #: Plural accessor for :attr:`preview`.
-    previews: Sequence[Union["Link", "Object"]] = plural_property(
+    previews: Sequence[Union[Link, "Object"]] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#preview")
     )
 
     #: The date and time at which the object was published.
-    published: datetime = singular_property(
+    published: Optional[datetime] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#published")
     )
 
     #: Identifies a :class:`Collection` containing objects considered to be
     #: responses to this object.
-    replies: "Collection" = singular_property(
+    replies: Optional["Collection"] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#replies")
     )
 
@@ -204,13 +204,13 @@ class Object(Entity):
     #: the object.  When used with an :class:`Activity` object, for instance,
     #: the :attr:`start_time` property specifies the moment the activity
     #: began or is scheduled to begin.
-    start_time: datetime = singular_property(
+    start_time: Optional[datetime] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#startTime")
     )
 
     #: A natural language summarization of the object encoded as HTML.
     #: Multiple language tagged summaries *may* be provided.
-    summary: str | LanguageString = singular_property(
+    summary: Optional[str | LanguageString] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#summary")
     )
 
@@ -224,22 +224,22 @@ class Object(Entity):
     #: :attr:`attachment` and :attr:`tag` is that the former implies
     #: association by inclusion, while the latter implies associated
     #: by reference.
-    tag: Union["Link", "Object"] = singular_property(
+    tag: Optional[Union[Link, "Object"]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#tag")
     )
 
     #: Plural accessor for :attr:`tag`.
-    tags: Sequence[Union["Link", "Object"]] = plural_property(
+    tags: Sequence[Union[Link, "Object"]] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#tag")
     )
 
     #: The date and time at which the object was updated.
-    updated: datetime = singular_property(
+    updated: Optional[datetime] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#updated")
     )
 
     #: Identifies one or more links to representations of the object.
-    url: Uri | Link = singular_property(
+    url: Optional[Uri | Link] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#url")
     )
 
@@ -250,52 +250,52 @@ class Object(Entity):
 
     #: Identifies an entity considered to be part of the public primary
     #: audience of an :class:`Object`.
-    to: Union["Link", "Object"] = singular_property(
+    to: Optional[Union[Link, "Object"]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#to")
     )
 
     #: Plural accessor for :attr:`to`.
-    tos: Sequence[Union["Link", "Object"]] = plural_property(
+    tos: Sequence[Union[Link, "Object"]] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#to")
     )
 
     #: Identifies an entity considered to be part of the public primary
     #: audience of an :class:`Object`.
-    bto: Union["Link", "Object"] = singular_property(
+    bto: Optional[Union[Link, "Object"]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#bto")
     )
 
     #: Plural accessor for :attr:`bto`.
-    btos: Sequence[Union["Link", "Object"]] = plural_property(
+    btos: Sequence[Union[Link, "Object"]] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#bto")
     )
 
     #: Identifies an :class:`Object` that is part of the public secondary
     #: audience of this :class:`Object`.
-    cc: Union["Link", "Object"] = singular_property(
+    cc: Optional[Union[Link, "Object"]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#cc")
     )
 
     #: Plural accessor for :attr:`cc`.
-    ccs: Sequence[Union["Link", "Object"]] = plural_property(
+    ccs: Sequence[Union[Link, "Object"]] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#cc")
     )
 
     #: Singular accessor for :attr:`bccs`.
-    bcc: Union["Link", "Object"] = singular_property(
+    bcc: Optional[Union[Link, "Object"]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#bcc")
     )
 
     #: Identifies one or more :class:`Object`\ s that are part of the private
     #: secondary audience of this :class:`Object`.
-    bccs: Sequence[Union["Link", "Object"]] = plural_property(
+    bccs: Sequence[Union[Link, "Object"]] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#bcc")
     )
 
     #: Identifies the MIME media type of the value of the :attr:`content`
     #: property.  If not specified, the :attr:`content` property is assumed to
     #: contain ``text/html`` content.
-    mediaType: str = singular_property(
+    mediaType: Optional[str] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#mediaType")
     )
 
@@ -307,7 +307,7 @@ class Object(Entity):
     #: 5 seconds is represented as "PT5S").
     #:
     #: __ https://www.w3.org/TR/xmlschema11-2/
-    duration: Duration = singular_property(
+    duration: Optional[Duration] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#duration")
     )
 
@@ -325,7 +325,7 @@ class Object(Entity):
     #:    ActivityPub --- `3.3 The source property`__
     #:
     #:    __ https://www.w3.org/TR/activitypub/#source-property
-    source: "Object" = singular_property(
+    source: Optional["Object"] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#source")
     )
 
@@ -364,7 +364,7 @@ class Object(Entity):
     #:    ActivityPub --- `5.7 Likes Collection`__
     #:
     #:    __ https://www.w3.org/TR/activitypub/#likes
-    likes: "Collection" = singular_property(
+    likes: Optional["Collection"] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#likes")
     )
 
@@ -381,7 +381,7 @@ class Object(Entity):
     #:    ActivityPub --- `5.8 Shares Collection`__
     #:
     #:    __ https://www.w3.org/TR/activitypub/#shares
-    shares: "Collection" = singular_property(
+    shares: Optional["Collection"] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#shares")
     )
 
@@ -398,7 +398,7 @@ class Object(Entity):
     #:    Proposed extensions --- `as:sensitive property`__
     #:
     #:    __ https://www.w3.org/wiki/Activity_Streams_extensions#as:sensitive_property
-    sensitive: bool = singular_property(
+    sensitive: Optional[bool] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#sensitive")
     )
 
@@ -435,24 +435,24 @@ class Place(Object):
     #: Indicates the accuracy of position coordinates on a :class:`Place`
     #: objects.  Expressed in properties of percentage. e.g. "94.0" means
     #: "94.0% accurate".
-    accuracy: float = singular_property(
+    accuracy: Optional[float] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#accuracy")
     )
 
     #: Indicates the altitude of a place.  The measurement units is indicated
     #: using the :attr:`units` property.  If :attr:`units` is not specified,
     #: the default is assumed to be "``m``" indicating meters.
-    altitude: float = singular_property(
+    altitude: Optional[float] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#altitude")
     )
 
     #: The latitude of a place.
-    latitude: float = singular_property(
+    latitude: Optional[float] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#latitude")
     )
 
     #: The longitude of a place.
-    longitude: float = singular_property(
+    longitude: Optional[float] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#longitude")
     )
 
@@ -460,16 +460,16 @@ class Place(Object):
     #: The units is expressed by the :attr:`units` property.  If :attr:`units`
     #: is not specified, the default is assumed to be "``m``" indicating
     #: "meters".
-    radius: float = singular_property(
+    radius: Optional[float] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#radius")
     )
 
     #: Specifies the measurement units for the :attr:`radius` and
     #: :attr:`altitude` properties on a :class:`Place` object.
     #: If not specified, the default is assumed to be "``m``" for "meters".
-    units: Literal["cm", "feet", "inches", "km", "m", "miles"] | Uri = (
-        singular_property(Uri("https://www.w3.org/ns/activitystreams#units"))
-    )
+    units: Optional[
+        Literal["cm", "feet", "inches", "km", "m", "miles"] | Uri
+    ] = singular_property(Uri("https://www.w3.org/ns/activitystreams#units"))
 
 
 class Profile(Object):
@@ -483,7 +483,7 @@ class Profile(Object):
 
     #: On a :class:`Profile` object, the describes property identifies
     #: the object described by the :class:`Profile`.
-    describes: Object = singular_property(
+    describes: Optional[Object] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#describes")
     )
 
@@ -505,12 +505,12 @@ class Relationship(Object):
     #: identifies one of the connected individuals.  For instance,
     #: for a ``Relationship`` object describing "John is related to Sally",
     #: ``subject`` would refer to John.
-    subject: Link | Object = singular_property(
+    subject: Optional[Link | Object] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#subject")
     )
 
     #: Describes the entity to which the :attr:`subject` is related.
-    object: Object | Link = singular_property(
+    object: Optional[Object | Link] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#object")
     )
 
@@ -528,7 +528,7 @@ class Relationship(Object):
     #:    According to the specification, its domain is ``Object``.  However,
     #:    the example in the specification shows it can have a value of
     #:    ``xsd:anyURI``.  Hence, we use ``Object | Uri`` here.
-    relationship: Object | Uri = singular_property(
+    relationship: Optional[Object | Uri] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#relationship")
     )
 
@@ -558,7 +558,7 @@ class Tombstone(Object):
     #:    See also the `related issue`__.
     #:
     #:    __ https://github.com/w3c/activitystreams/issues/440
-    former_type: Object | Uri = singular_property(
+    former_type: Optional[Object | Uri] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#formerType")
     )
 
@@ -569,7 +569,7 @@ class Tombstone(Object):
 
     #: On a :class:`Tombstone` object, the ``deleted`` property is a timestamp
     #: for when the object was deleted.
-    deleted: datetime = singular_property(
+    deleted: Optional[datetime] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#deleted")
     )
 
