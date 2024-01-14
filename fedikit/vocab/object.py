@@ -244,7 +244,7 @@ class Object(Entity):
     )
 
     #: Plural accessor for :attr:`url`.
-    urls: Sequence[Uri | Link] = singular_property(
+    urls: Sequence[Uri | Link] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#url")
     )
 
@@ -295,7 +295,7 @@ class Object(Entity):
     #: Identifies the MIME media type of the value of the :attr:`content`
     #: property.  If not specified, the :attr:`content` property is assumed to
     #: contain ``text/html`` content.
-    mediaType: Optional[str] = singular_property(
+    media_type: Optional[str] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#mediaType")
     )
 
