@@ -67,6 +67,21 @@ class OrderedCollection(Collection):
 
     __uri__ = Uri("https://www.w3.org/ns/activitystreams#OrderedCollection")
 
+    #: Identifies the items contained in a collection.  The items might be
+    #: ordered or unordered.
+    items: Sequence[Object | Link] = plural_property(
+        Uri("https://www.w3.org/ns/activitystreams#items"),
+        subproperties=[
+            Uri("https://www.w3.org/ns/activitystreams#orderedItems")
+        ],
+    )
+
+    #: Identifies the items contained in a collection.  The items must be
+    #: ordered.
+    ordered_items: Sequence[Object | Link] = plural_property(
+        Uri("https://www.w3.org/ns/activitystreams#orderedItems")
+    )
+
 
 class CollectionPage(Collection):
     """Used to represent distinct subsets of items from a :class:`Collection`.
