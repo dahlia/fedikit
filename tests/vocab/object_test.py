@@ -14,7 +14,7 @@ from fedikit.vocab.object import Object, Place
 
 
 @pytest.mark.asyncio
-async def test_object_from_jsonld() -> None:
+async def test_object_from_jsonld(document_loader: DocumentLoader) -> None:
     parsed = await from_jsonld(
         Object,
         {
@@ -32,6 +32,7 @@ async def test_object_from_jsonld() -> None:
                 "items": [{"name": "reply", "type": "Object"}],
             },
         },
+        loader=document_loader,
     )
     assert parsed == Object(
         name="foo",
@@ -60,6 +61,7 @@ async def test_object_from_jsonld() -> None:
                 {"type": "Link", "as:href": "https://example.com/"},
             ],
         },
+        loader=document_loader,
     )
     assert isinstance(parsed2, Object)
     assert parsed2.name == "foo"
@@ -71,6 +73,7 @@ async def test_object_from_jsonld() -> None:
     parsed3 = await from_jsonld(
         Object,
         {"@context": "https://www.w3.org/ns/activitystreams", "name": "foo"},
+        loader=document_loader,
     )
     assert isinstance(parsed3, Object)
     assert parsed3.name == "foo"
