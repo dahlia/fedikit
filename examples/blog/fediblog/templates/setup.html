@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+
+{% block title -%}
+  FediBlog: Setup
+{%- endblock %}
+
+{% block main %}
+  <h1>Setting Up FediBlog</h1>
+  <form method="post" action="{{ url_for('do_setup') }}">
+    <div class="grid">
+      <div>
+        <label for="handle">Handle</label>
+        <input
+          type="text"
+          id="handle"
+          name="handle"
+          placeholder="your_handle"
+          required>
+        <small>
+          Other users in the fediverse will use this to follow or mention you.
+          Note that <strong>@{{ request.host }}</strong> will be appended to
+          this handle.
+        </small>
+      </div>
+      <label for="title">
+        Blog title
+        <input
+          type="text"
+          id="title"
+          name="title"
+          placeholder="Your Blog Title"
+          required>
+      </label>
+    </div>
+    <label for="description">Description</label>
+    <textarea
+      id="description"
+      name="description"
+      placeholder="A short description of your blog."
+      rows="3"
+      cols="80"
+      required></textarea>
+    <small>
+      Other users in the fediverse will see this as your profile bio.
+    </small>
+    <button type="submit">Submit</button>
+  </form>
+{% endblock %}

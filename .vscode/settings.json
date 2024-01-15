@@ -1,7 +1,12 @@
 {
+  "black-formatter.args": [
+    "--line-length=79",
+    "--target-version=py312",
+    "--preview"
+  ],
   "flake8.importStrategy": "fromEnvironment",
   "flake8.args": [
-    "--ignore=E501,E704,W503"
+    "--ignore=E203,E501,E704,W503"
   ],
   "python.languageServer": "Pylance",
   "python.analysis.typeCheckingMode": "basic",
@@ -24,6 +29,7 @@
   },
   "cSpell.words": [
     "aiohttp",
+    "aiosqlite",
     "ASGI",
     "asyncio",
     "attributee",
@@ -32,9 +38,12 @@
     "docloader",
     "documentloader",
     "fedi",
+    "fediblog",
     "fedikit",
     "fediverse",
+    "hypercorn",
     "isoduration",
+    "isoformat",
     "isort",
     "jsonld",
     "langcodes",
@@ -48,8 +57,11 @@
     "Pythonic",
     "refurb",
     "rels",
+    "sansio",
     "seealso",
     "subproperties",
-    "subproperty"
+    "subproperty",
+    "webfinger",
+    "werkzeug"
   ]
 }

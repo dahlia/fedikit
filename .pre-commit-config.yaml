@@ -34,7 +34,7 @@ repos:
     - flake8-bugbear ~= 23.12.2
     - pyproject-flake8 ~= 6.1.0
     args:
-    - --ignore=E501,E704,W503
+    - --ignore=E203,E501,E704,W503
 
 - repo: https://github.com/dosisod/refurb
   rev: v1.26.0
@@ -45,18 +45,33 @@ repos:
   rev: 23.12.1
   hooks:
   - id: black
+    args:
+    - --line-length=79
+    - --target-version=py312
+    - --preview
 
 - repo: https://github.com/pycqa/isort
   rev: 5.13.2
   hooks:
   - id: isort
+    args:
+    - --profile=black
+    - --line-length=79
 
 - repo: https://github.com/pre-commit/mirrors-mypy
   rev: v1.8.0
   hooks:
   - id: mypy
-    args: [--config-file, pyproject.toml]
+    args:
+    - --config-file=pyproject.toml
+    - --strict
+    - --scripts-are-modules
     additional_dependencies:
+    - aiosqlite ~= 0.19.0
+    - asgi-tools ~= 0.76.0
+    - Hypercorn >= 0.16.0, < 1.0.0
     - langcodes ~= 3.3.0
     - pytest ~= 7.4.3
     - pytest-asyncio ~= 0.23.2
+    - Quart ~= 0.19.4
+    - Werkzeug >= 2.0.0, < 4.0.0

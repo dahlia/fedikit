@@ -37,13 +37,16 @@ requires-python = ">= 3.12"
 dynamic = ["version"]
 
 dependencies = [
+  "Hypercorn >= 0.16.0, < 1.0.0",
   "isoduration ~= 20.11.0",
   "langcodes ~= 3.3.0",
   "PyLD[requests] ~= 2.0.3",
+  "Werkzeug >= 2.0.0, < 4.0.0",
 ]
 
 [project.optional-dependencies]
 dev = [
+  "asgi-tools ~= 0.76.0",
   "flake8 ~= 6.1.0",
   "flake8-bugbear ~= 23.12.2",
   "mypy ~= 1.8.0",
@@ -64,7 +67,7 @@ preview = true
 
 [tool.flake8]
 max-line-length = 79
-extend-ignore = ["E501", "E704", "W503"]
+extend-ignore = ["E203", "E501", "E704", "W503"]
 
 [tool.isort]
 profile = "black"
@@ -85,6 +88,7 @@ disallow_untyped_defs = false
 
 [tool.pytest.ini_options]
 addopts = "--mypy"
+testpaths = ["fedikit", "tests"]
 filterwarnings = [
   "ignore::DeprecationWarning:dateutil.tz.tz",
 ]

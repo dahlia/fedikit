@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+
+{% block title -%}
+  {{ metadata.title }}
+{%- endblock %}
+
+{% block main %}
+  <hgroup>
+    <h1>{{ metadata.title }}</h1>
+    <p>{{ metadata.description }}</p>
+  </hgroup>
+  <form method="post" action="{{ url_for('do_add_post') }}">
+    <textarea id="content" name="content" rows="5" cols="80" required></textarea>
+    <button type="submit">Post</button>
+  </form>
+  {% for post in posts %}
+    <article>
+      {{ post.content }}
+      <footer>
+        Published at <time datetime="{{ post.published.isoformat() }}">
+          {{- post.published.strftime('%c') }}</time>
+      </footer>
+    </article>
+  {% endfor %}
+{% endblock %}
