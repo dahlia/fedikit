@@ -4,6 +4,7 @@
     "--target-version=py312",
     "--preview"
   ],
+  "black-formatter.importStrategy": "fromEnvironment",
   "flake8.importStrategy": "fromEnvironment",
   "flake8.args": [
     "--ignore=E203,E501,E704,W503"

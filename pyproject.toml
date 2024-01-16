@@ -47,6 +47,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   "asgi-tools ~= 0.76.0",
+  "black ~= 23.12.1",
   "flake8 ~= 6.1.0",
   "flake8-bugbear ~= 23.12.2",
   "mypy ~= 1.8.0",
