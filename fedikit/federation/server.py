@@ -22,10 +22,22 @@ from werkzeug.sansio.request import Request
 from ..model.converters import jsonld
 from ..uri import Uri
 from ..vocab import link
+from ..vocab.activity import Activity
 from ..vocab.actor import Actor
+from ..vocab.collection import OrderedCollection
 from ..webfinger.jrd import Link, MediaType, ResourceDescriptor
+from .collection import Page
 
-__all__ = ["ActorDispatcher", "AsgiApp", "Context", "Server", "ServerAsgi"]
+__all__ = [
+    "ActorDispatcher",
+    "AsgiApp",
+    "Context",
+    "OutboxCounter",
+    "OutboxDispatcher",
+    "Request",
+    "Server",
+    "ServerAsgi",
+]
 
 
 #: A type alias for an ASGI application.
@@ -105,6 +117,9 @@ TContextData = TypeVar("TContextData")
 class Context(Generic[TContextData]):
     """A context for a request."""
 
+    #: The request object.
+    request: Request
+
     #: The routing map adapter.
     map_adapter: MapAdapter
 
@@ -124,6 +139,19 @@ class Context(Generic[TContextData]):
             )
         )
 
+    def outbox_uri(self, handle: str) -> Uri:
+        """Return the URI of an actor's outbox with the given handle.
+
+        :param handle: The actor's handle.
+        :return: The actor's outbox URI.
+
+        """
+        return Uri(
+            self.map_adapter.build(
+                "outbox", {"handle": handle}, force_external=True
+            )
+        )
+
 
 class ActorDispatcher(Protocol[TContextData]):
     """A protocol for callables that dispatch actors."""
@@ -133,17 +161,42 @@ class ActorDispatcher(Protocol[TContextData]):
     ) -> Optional[Actor] | Awaitable[Optional[Actor]]: ...
 
 
+class OutboxDispatcher(Protocol[TContextData]):
+    """A protocol for callables that dispatch outboxes."""
+
+    def __call__(
+        self,
+        context: Context[TContextData],
+        handle: str,
+        cursor: Optional[str],
+    ) -> Optional[Page[Activity]] | Awaitable[Optional[Page[Activity]]]: ...
+
+
+class OutboxCounter(Protocol[TContextData]):
+    """A protocol for callables that count outbox contents."""
+
+    def __call__(
+        self,
+        context: Context[TContextData],
+        handle: str,
+    ) -> Optional[int] | Awaitable[Optional[int]]: ...
+
+
 class Server(Generic[TContextData]):
     """A server to handle requests from the fediverse."""
 
     _map: Map
     _actor_dispatcher: Optional[ActorDispatcher[TContextData]]
+    _outbox_dispatcher: Optional[OutboxDispatcher[TContextData]]
+    _outbox_counter: Optional[OutboxCounter[TContextData]]
 
     def __init__(self) -> None:
         self._map = Map([
             Rule("/.well-known/webfinger", endpoint="webfinger"),
         ])
         self._actor_dispatcher = None
+        self._outbox_dispatcher = None
+        self._outbox_counter = None
 
     def actor_dispatcher(
         self, path: str
@@ -166,6 +219,34 @@ class Server(Generic[TContextData]):
 
         return decorate
 
+    def outbox_dispatcher(
+        self, path: str
+    ) -> Callable[
+        [OutboxDispatcher[TContextData]], OutboxDispatcher[TContextData]
+    ]:
+        """A decorator to register an outbox dispatcher.
+
+        :param path: The path to route to the outbox dispatcher.  It must
+            contain a ``<handle>`` placeholder.
+        """
+        rule = Rule(path, endpoint="outbox")
+
+        def decorate(
+            dispatch: OutboxDispatcher[TContextData],
+        ) -> OutboxDispatcher[TContextData]:
+            self._outbox_dispatcher = dispatch
+            self._map.add(rule)
+            return dispatch
+
+        return decorate
+
+    def outbox_counter(
+        self, count: OutboxCounter[TContextData]
+    ) -> OutboxCounter[TContextData]:
+        """A decorator to register an outbox counter."""
+        self._outbox_counter = count
+        return count
+
     async def dispatch_actor(
         self, context: Context[TContextData], handle: str
     ) -> Optional[Actor]:
@@ -174,14 +255,50 @@ class Server(Generic[TContextData]):
         :param context: The context for the request.
         :param handle: The actor's handle to dispatch.
         :return: The actor, or ``None`` if no actor was found.
-        :raise RuntimeError: If no actor dispatcher is registered.
         """
         if self._actor_dispatcher is None:
-            raise RuntimeError("No actor dispatcher registered")
+            return None
         dispatched = self._actor_dispatcher(context, handle)
         if dispatched is None or isinstance(dispatched, Actor):
             return dispatched
         return await dispatched
+
+    async def dispatch_outbox(
+        self,
+        context: Context[TContextData],
+        handle: str,
+        cursor: Optional[str],
+    ) -> Optional[Page[Activity]]:
+        """Dispatch an outbox using the registered outbox dispatcher.
+
+        :param context: The context for the request.
+        :param handle: The actor's handle whose outbox to dispatch.
+        :param cursor: An optional cursor to paginate the outbox.
+        :return: The contents of the outbox, or ``None`` if no outbox was found.
+        """
+        if self._outbox_dispatcher is None:
+            return None
+        dispatched = self._outbox_dispatcher(context, handle, cursor)
+        if dispatched is None or isinstance(dispatched, Page):
+            return dispatched
+        return await dispatched
+
+    async def count_outbox(
+        self, context: Context[TContextData], handle: str
+    ) -> Optional[int]:
+        """Count the contents of an outbox using the registered outbox counter.
+
+        :param context: The context for the request.
+        :param handle: The actor's handle whose outbox to count.
+        :return: The number of items in the outbox, or ``None`` if no outbox was
+            found.
+        """
+        if self._outbox_counter is None:
+            return None
+        total_items = self._outbox_counter(context, handle)
+        if total_items is None or isinstance(total_items, int):
+            return total_items
+        return await total_items
 
     def asgi(
         self,
@@ -303,15 +420,19 @@ class ServerAsgi(Generic[TContextData]):
             or "application/json" in request.accept_mimetypes  # type: ignore
         ):
             return await self.on_not_acceptable(scope, receive, send)
-        context = Context(adapter, self.context_data)
+        context = Context(request, adapter, self.context_data)
         match endpoint:
             case "webfinger":
                 return await self._webfinger_asgi(
-                    context, args, request, scope, receive, send
+                    context, args, scope, receive, send
                 )
             case "actor":
                 return await self._actor_asgi(
-                    context, args, request, scope, receive, send
+                    context, args, scope, receive, send
+                )
+            case "outbox":
+                return await self._outbox_asgi(
+                    context, args, scope, receive, send
                 )
         return await self.on_not_found(scope, receive, send)
 
@@ -319,14 +440,13 @@ class ServerAsgi(Generic[TContextData]):
         self,
         context: Context[TContextData],
         args: Mapping[str, Any],
-        request: Request,
         scope: Scope,
         receive: ASGIReceiveCallable,
         send: ASGISendCallable,
     ) -> None:
         if self.server._actor_dispatcher is None:
             return await self.on_not_found(scope, receive, send)
-        resource = request.args.get("resource")
+        resource = context.request.args.get("resource")
         if resource is None:
             await send({
                 "type": "http.response.start",
@@ -340,7 +460,8 @@ class ServerAsgi(Generic[TContextData]):
             })
             return
         match = re.match(
-            r"^acct:([^@]+)@" + re.escape(request.host) + r"$", resource
+            r"^acct:([^@]+)@" + re.escape(context.request.host) + r"$",
+            resource,
         )
         if not match:
             return await self.on_not_found(scope, receive, send)
@@ -396,7 +517,6 @@ class ServerAsgi(Generic[TContextData]):
         self,
         context: Context[TContextData],
         args: Mapping[str, Any],
-        request: Request,
         scope: Scope,
         receive: ASGIReceiveCallable,
         send: ASGISendCallable,
@@ -405,9 +525,45 @@ class ServerAsgi(Generic[TContextData]):
             context, args["handle"]
         )
         if actor is None:
-            await self.on_not_found(scope, receive, send)
-            return
+            return await self.on_not_found(scope, receive, send)
         doc = await jsonld(actor)
+        await send({
+            "type": "http.response.start",
+            "status": 200,
+            "headers": [(
+                b"content-type",
+                (
+                    b"application/ld+json;"
+                    b' profile="https://www.w3.org/ns/activitystreams"'
+                ),
+            )],
+        })
+        await send({
+            "type": "http.response.body",
+            "body": json.dumps(doc).encode("utf-8"),
+            "more_body": False,
+        })
+
+    async def _outbox_asgi(
+        self,
+        context: Context[TContextData],
+        args: Mapping[str, Any],
+        scope: Scope,
+        receive: ASGIReceiveCallable,
+        send: ASGISendCallable,
+    ) -> None:
+        handle = args["handle"]
+        page: Optional[Page[Activity]] = await self.server.dispatch_outbox(
+            context, handle, cursor=None  # TODO
+        )
+        if page is None:
+            return await self.on_not_found(scope, receive, send)
+        _, _, items = page
+        collection = OrderedCollection(
+            total_items=await self.server.count_outbox(context, handle),
+            ordered_items=items,
+        )
+        doc = await jsonld(collection)
         await send({
             "type": "http.response.start",
             "status": 200,

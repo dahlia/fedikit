@@ -1,0 +1,20 @@
+{% extends "layout.html" %}
+
+{% block title -%}
+  {{ post.published.strftime('%c') }} &mdash; {{ metadata.title }}
+{%- endblock %}
+
+{% block main %}
+  <hgroup>
+    <h1>{{ metadata.title }}</h1>
+    <p>{{ metadata.description }}</p>
+  </hgroup>
+  <article>
+    {{ post.content }}
+    <footer>
+      Published at <a href="{{ url_for('show_post', post_id=post.id) }}">
+        <time datetime="{{ post.published.isoformat() }}">
+        {{- post.published.strftime('%c') }}</time></a>
+    </footer>
+  </article>
+{% endblock %}

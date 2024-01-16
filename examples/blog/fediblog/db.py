@@ -1,11 +1,20 @@
 from collections.abc import AsyncIterable
 from datetime import datetime
+from typing import Optional, cast
 
 from aiosqlite import Connection
 
 from .data import Metadata, MetadataWithCreated, Post
 
-__all__ = ["get_metadata", "get_posts", "has_initialized", "initialize"]
+__all__ = [
+    "add_post",
+    "count_posts",
+    "get_metadata",
+    "get_post",
+    "get_posts",
+    "has_initialized",
+    "initialize",
+]
 
 
 async def has_initialized(db: Connection) -> bool:
@@ -38,7 +47,7 @@ async def initialize(db: Connection, metadata: Metadata) -> None:
     """)
     await db.execute(
         """
-        INSERT INTO metadata (id, handle, title, description, created)
+        INSERT INTO metadata (id, handle, title, description)
         VALUES (1, ?, ?, ?)
         """,
         (metadata.handle, metadata.title, metadata.description),
@@ -69,3 +78,21 @@ async def get_posts(db: Connection) -> AsyncIterable[Post]:
     async with cursor:
         async for row in cursor:
             yield Post(row[0], row[1], datetime.fromisoformat(row[2] + "Z"))
+
+
+async def get_post(db: Connection, post_id: int) -> Optional[Post]:
+    cursor = await db.execute(
+        "SELECT content, published FROM posts WHERE id = ?",
+        (post_id,),
+    )
+    async with cursor:
+        async for row in cursor:
+            return Post(post_id, row[0], datetime.fromisoformat(row[1] + "Z"))
+    return None
+
+
+async def count_posts(db: Connection) -> int:
+    cursor = await db.execute("SELECT count(*) FROM posts")
+    async with cursor:
+        row = await cursor.fetchone()
+        return 0 if row is None else cast(int, row[0])

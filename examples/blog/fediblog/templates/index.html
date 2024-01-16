@@ -17,8 +17,9 @@
     <article>
       {{ post.content }}
       <footer>
-        Published at <time datetime="{{ post.published.isoformat() }}">
-          {{- post.published.strftime('%c') }}</time>
+        Published at <a href="{{ url_for('show_post', post_id=post.id) }}">
+          <time datetime="{{ post.published.isoformat() }}">
+          {{- post.published.strftime('%c') }}</time></a>
       </footer>
     </article>
   {% endfor %}

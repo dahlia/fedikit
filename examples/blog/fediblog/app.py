@@ -10,7 +10,14 @@ from quart import (
 )
 
 from .data import Metadata
-from .db import add_post, get_metadata, get_posts, has_initialized, initialize
+from .db import (
+    add_post,
+    get_metadata,
+    get_post,
+    get_posts,
+    has_initialized,
+    initialize,
+)
 from .federation import CtxData, server
 
 __all__ = ["app"]
@@ -18,7 +25,11 @@ __all__ = ["app"]
 app = Quart(__name__)
 app.config.from_prefixed_env("FEDIBLOG")
 app.asgi_app = server.asgi(  # type: ignore
-    CtxData(app.config), app.asgi_app, app.asgi_app, app.asgi_app, app.asgi_app
+    CtxData(app),
+    on_non_http=app.asgi_app,
+    on_not_found=app.asgi_app,
+    on_method_not_allowed=app.asgi_app,
+    on_not_acceptable=app.asgi_app,
 )
 
 
@@ -47,6 +58,16 @@ async def do_add_post() -> ResponseReturnValue:
         await add_post(db, form["content"])
         await db.commit()
         return redirect(url_for("index"), 303)
+
+
+@app.route("/posts/<int:post_id>/")
+async def show_post(post_id: int) -> ResponseReturnValue:
+    async with connect_db() as db:
+        if not await has_initialized(db):
+            return redirect(url_for("setup"))
+        metadata = await get_metadata(db)
+        post = await get_post(db, post_id)
+        return await render_template("post.html", metadata=metadata, post=post)
 
 
 @app.route("/setup/")

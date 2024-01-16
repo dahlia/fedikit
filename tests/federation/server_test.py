@@ -7,9 +7,13 @@ import pytest
 from asgi_tools.tests import ASGITestClient
 from asgi_tools.types import TASGIApp
 
+from fedikit.federation.collection import Page
 from fedikit.federation.server import Context, Server
+from fedikit.model.entity import EntityRef
 from fedikit.uri import Uri
+from fedikit.vocab.activity import Activity, Create
 from fedikit.vocab.actor import Actor, Person
+from fedikit.vocab.object import Note
 
 actors: dict[str, Callable[[Uri], Actor]] = {
     "alice": lambda uri: Person(
@@ -44,6 +48,41 @@ async def dispatch_actor(
     if handle not in context.data.actors:
         return None
     return context.data.actors[handle](context.actor_uri(handle))
+
+
+@server.outbox_dispatcher("/actors/<handle>/outbox")
+async def dispatch_outbox(
+    context: Context[CtxData], handle: str, cursor: Optional[str]
+) -> Optional[Page[Activity]]:
+    if handle not in context.data.actors:
+        return None
+    return Page(
+        prev_cursor=None,
+        next_cursor=None,
+        items=[
+            Create(
+                actor=EntityRef(context.actor_uri(handle)),
+                object=Note(content="Hello, world!"),
+            ),
+            Create(
+                actor=EntityRef(context.actor_uri(handle)),
+                object=Note(content="foo"),
+            ),
+            Create(
+                actor=EntityRef(context.actor_uri(handle)),
+                object=Note(content="bar"),
+            ),
+        ],
+    )
+
+
+@server.outbox_counter
+async def count_outbox(
+    context: Context[CtxData], handle: str
+) -> Optional[int]:
+    if handle not in context.data.actors:
+        return None
+    return 3
 
 
 @pytest.fixture
@@ -147,6 +186,48 @@ async def test_actor_dispatcher(client: ASGITestClient) -> None:
 
     non_existent = await client.request("/actors/non-existent", "GET")
     assert non_existent.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_outbox_dispatcher(client: ASGITestClient) -> None:
+    alice = await client.request("/actors/alice/outbox", "GET")
+    assert alice.status_code == 200
+    assert (
+        alice.content_type
+        == "application/ld+json;"
+        ' profile="https://www.w3.org/ns/activitystreams"'
+    )
+    assert await alice.json() == {
+        "@context": "https://www.w3.org/ns/activitystreams",
+        "type": "OrderedCollection",
+        "totalItems": 3,
+        "as:orderedItems": [
+            {
+                "type": "Create",
+                "actor": "http://fedikit.test/actors/alice",
+                "object": {
+                    "type": "Note",
+                    "content": "Hello, world!",
+                },
+            },
+            {
+                "type": "Create",
+                "actor": "http://fedikit.test/actors/alice",
+                "object": {
+                    "type": "Note",
+                    "content": "foo",
+                },
+            },
+            {
+                "type": "Create",
+                "actor": "http://fedikit.test/actors/alice",
+                "object": {
+                    "type": "Note",
+                    "content": "bar",
+                },
+            },
+        ],
+    }
 
 
 # cSpell: ignore TASGI
