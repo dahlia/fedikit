@@ -54,6 +54,14 @@ repos:
   rev: 5.13.2
   hooks:
   - id: isort
+    exclude: '^examples/'
+    args:
+    - --profile=black
+    - --line-length=79
+    - --project=fedikit
+  - id: isort
+    alias: isort-examples
+    exclude: '^(fedikit|tests)/'
     args:
     - --profile=black
     - --line-length=79

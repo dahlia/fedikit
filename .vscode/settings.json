@@ -9,6 +9,10 @@
   "flake8.args": [
     "--ignore=E203,E501,E704,W503"
   ],
+  "isort.args": [
+    "--profile=black",
+    "--line-length=79"
+  ],
   "python.languageServer": "Pylance",
   "python.analysis.typeCheckingMode": "basic",
   "[json]": {
