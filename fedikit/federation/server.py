@@ -411,7 +411,13 @@ class ServerAsgi(Generic[TContextData]):
         await send({
             "type": "http.response.start",
             "status": 200,
-            "headers": [(b"content-type", b"application/ld+json")],
+            "headers": [(
+                b"content-type",
+                (
+                    b"application/ld+json;"
+                    b' profile="https://www.w3.org/ns/activitystreams"'
+                ),
+            )],
         })
         await send({
             "type": "http.response.body",

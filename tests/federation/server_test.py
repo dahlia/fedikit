@@ -6,6 +6,7 @@ from typing import Callable, Optional, cast
 import pytest
 from asgi_tools.tests import ASGITestClient
 from asgi_tools.types import TASGIApp
+
 from fedikit.federation.server import Context, Server
 from fedikit.uri import Uri
 from fedikit.vocab.actor import Actor, Person
@@ -112,7 +113,11 @@ async def test_webfinger(client: ASGITestClient) -> None:
 async def test_actor_dispatcher(client: ASGITestClient) -> None:
     alice = await client.request("/actors/alice", "GET")
     assert alice.status_code == 200
-    assert alice.content_type == "application/ld+json"
+    assert (
+        alice.content_type
+        == "application/ld+json;"
+        ' profile="https://www.w3.org/ns/activitystreams"'
+    )
     assert await alice.json() == {
         "@context": "https://www.w3.org/ns/activitystreams",
         "id": "http://fedikit.test/actors/alice",
@@ -125,7 +130,11 @@ async def test_actor_dispatcher(client: ASGITestClient) -> None:
 
     bob = await client.request("/actors/bob", "GET")
     assert bob.status_code == 200
-    assert bob.content_type == "application/ld+json"
+    assert (
+        bob.content_type
+        == "application/ld+json;"
+        ' profile="https://www.w3.org/ns/activitystreams"'
+    )
     assert await bob.json() == {
         "@context": "https://www.w3.org/ns/activitystreams",
         "id": "http://fedikit.test/actors/bob",
