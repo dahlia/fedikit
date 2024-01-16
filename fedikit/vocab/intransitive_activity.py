@@ -3,6 +3,7 @@ from datetime import datetime
 from typing import Optional
 
 from ..model.descriptors import plural_property, singular_property
+from ..model.entity import EntityRef
 from ..uri import Uri
 from .activity import Activity
 from .link import Link
@@ -45,7 +46,7 @@ class Question(IntransitiveActivity):
     #: Use of ``one_of`` implies that the :class:`Question` can have only
     #: a single answer.  To indicate that a :class:`Question` can have multiple
     #: answers, use :attr:`any_of`.
-    one_of: Sequence[Object | Link] = plural_property(
+    one_of: Sequence[EntityRef | Object | Link] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#oneOf")
     )
 
@@ -53,14 +54,14 @@ class Question(IntransitiveActivity):
     #: Use of ``any_of`` implies that the :class:`Question` can have multiple
     #: answers.  To indicate that a :class:`Question` can have only one answer,
     #: use :attr:`one_of`.
-    any_of: Sequence[Object | Link] = plural_property(
+    any_of: Sequence[EntityRef | Object | Link] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#anyOf")
     )
 
     #: Indicates that a question has been closed, and answers are no longer
     #: accepted.
-    closed: Optional[Object | Link | datetime | bool] = singular_property(
-        Uri("https://www.w3.org/ns/activitystreams#closed")
+    closed: Optional[EntityRef | Object | Link | datetime | bool] = (
+        singular_property(Uri("https://www.w3.org/ns/activitystreams#closed"))
     )
 
     __uri__ = Uri("https://www.w3.org/ns/activitystreams#Question")

@@ -84,11 +84,11 @@ async def test_entity_ref_load(document_loader: DocumentLoader) -> None:
 @pytest.mark.asyncio
 async def test_load_entity_refs(document_loader: DocumentLoader) -> None:
     act = Activity(
-        attachment=EntityRef("https://example.com/foo"),  # type: ignore
-        object=EntityRef("https://example.com/bar"),  # type: ignore
+        attachment=EntityRef("https://example.com/foo"),
+        object=EntityRef("https://example.com/bar"),
     )
-    assert act.attachment is None
-    assert act.object is None
+    assert act.attachment == EntityRef("https://example.com/foo")
+    assert act.object == EntityRef("https://example.com/bar")
     await load_entity_refs(act, "attachment", loader=document_loader)
     assert act.attachment == Object(
         name="foo",
@@ -97,14 +97,14 @@ async def test_load_entity_refs(document_loader: DocumentLoader) -> None:
             Link(href=Uri("https://example.com/")),
         ],
     )
-    assert act.object is None
+    assert act.object == EntityRef("https://example.com/bar")
 
     act2 = Activity(
-        attachment=EntityRef("https://example.com/foo"),  # type: ignore
-        object=EntityRef("https://example.com/bar"),  # type: ignore
+        attachment=EntityRef("https://example.com/foo"),
+        object=EntityRef("https://example.com/bar"),
     )
-    assert act2.attachment is None
-    assert act2.object is None
+    assert act2.attachment == EntityRef("https://example.com/foo")
+    assert act2.object == EntityRef("https://example.com/bar")
     await load_entity_refs(act2, loader=document_loader)
     assert act2.attachment == Object(
         name="foo",

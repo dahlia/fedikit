@@ -5,7 +5,7 @@ from typing import Literal, Optional, Union
 from isoduration.types import Duration
 
 from ..model.descriptors import id_property, plural_property, singular_property
-from ..model.entity import Entity
+from ..model.entity import Entity, EntityRef
 from ..model.langstr import LanguageString
 from ..uri import Uri
 from .link import Link
@@ -40,35 +40,39 @@ class Object(Entity):
     #: Identifies a resource attached or related to an object that potentially
     #: requires special handling.  The intent is to provide a model that is
     #: at least semantically similar to attachments in email.
-    attachment: Optional[Union["Object", Link]] = singular_property(
+    attachment: Optional[Union[EntityRef, "Object", Link]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#attachment")
     )
 
     #: Plural accessor for :attr:`attachment`.
-    attachments: Sequence[Union["Object", Link]] = plural_property(
+    attachments: Sequence[Union[EntityRef, "Object", Link]] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#attachment")
     )
 
     #: Identifies one or more entities to which this object is attributed.
     #: The attributed entities might not be :class:`Actor`\ s.  For instance,
     #: an object might be attributed to the completion of another activity.
-    attributed_to: Optional[Union["Object", Link]] = singular_property(
-        Uri("https://www.w3.org/ns/activitystreams#attributedTo")
+    attributed_to: Optional[Union[EntityRef, "Object", Link]] = (
+        singular_property(
+            Uri("https://www.w3.org/ns/activitystreams#attributedTo")
+        )
     )
 
     #: Plural accessor for :attr:`attributed_to`.
-    attributed_tos: Sequence[Union["Object", Link]] = plural_property(
-        Uri("https://www.w3.org/ns/activitystreams#attributedTo")
+    attributed_tos: Sequence[Union[EntityRef, "Object", Link]] = (
+        plural_property(
+            Uri("https://www.w3.org/ns/activitystreams#attributedTo")
+        )
     )
 
     #: Identifies one or more entities that represent the total population of
     #: entities for which the object can considered to be relevant.
-    audience: Optional[Union["Object", Link]] = singular_property(
+    audience: Optional[Union[EntityRef, "Object", Link]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#audience")
     )
 
     #: Plural accessor for :attr:`audience`.
-    audiences: Sequence[Union["Object", Link]] = plural_property(
+    audiences: Sequence[Union[EntityRef, "Object", Link]] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#audience")
     )
 
@@ -94,12 +98,12 @@ class Object(Entity):
     #: function is to serve as a means of grouping objects and activities that
     #: share a common originating context or purpose. An example could be
     #: all activities relating to a common project or event.
-    context: Optional[Union["Object", Link]] = singular_property(
+    context: Optional[Union[EntityRef, "Object", Link]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#context")
     )
 
     #: Plural accessor for :attr:`context`.
-    contexts: Sequence[Union["Object", Link]] = plural_property(
+    contexts: Sequence[Union[EntityRef, "Object", Link]] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#context")
     )
 
@@ -124,12 +128,12 @@ class Object(Entity):
     )
 
     #: Identifies the entity (e.g. an application) that generated the object.
-    generator: Optional[Union["Object", Link]] = singular_property(
+    generator: Optional[Union[EntityRef, "Object", Link]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#generator")
     )
 
     #: Plural accessor for :attr:`generator`.
-    generators: Sequence[Union["Object", Link]] = plural_property(
+    generators: Sequence[Union[EntityRef, "Object", Link]] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#generator")
     )
 
@@ -159,33 +163,35 @@ class Object(Entity):
 
     #: Indicates one or more entities for which this object is considered
     #: a response.
-    in_reply_to: Optional[Union["Object", Link]] = singular_property(
-        Uri("https://www.w3.org/ns/activitystreams#inReplyTo")
+    in_reply_to: Optional[Union[EntityRef, "Object", Link]] = (
+        singular_property(
+            Uri("https://www.w3.org/ns/activitystreams#inReplyTo")
+        )
     )
 
     #: Plural accessor for :attr:`in_reply_to`.
-    in_reply_tos: Sequence[Union["Object", Link]] = plural_property(
+    in_reply_tos: Sequence[Union[EntityRef, "Object", Link]] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#inReplyTo")
     )
 
     #: Indicates one or more physical or logical locations associated with
     #: the object.
-    location: Optional[Union["Object", Link]] = singular_property(
+    location: Optional[Union[EntityRef, "Object", Link]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#location")
     )
 
     #: Plural accessor for :attr:`location`.
-    locations: Sequence[Union["Object", Link]] = plural_property(
+    locations: Sequence[Union[EntityRef, "Object", Link]] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#location")
     )
 
     #: Identifies an entity that provides a preview of this object.
-    preview: Optional[Union[Link, "Object"]] = singular_property(
+    preview: Optional[Union[EntityRef, Link, "Object"]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#preview")
     )
 
     #: Plural accessor for :attr:`preview`.
-    previews: Sequence[Union[Link, "Object"]] = plural_property(
+    previews: Sequence[Union[EntityRef, Link, "Object"]] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#preview")
     )
 
@@ -196,7 +202,7 @@ class Object(Entity):
 
     #: Identifies a :class:`Collection` containing objects considered to be
     #: responses to this object.
-    replies: Optional["Collection"] = singular_property(
+    replies: Optional[Union[EntityRef, "Collection"]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#replies")
     )
 
@@ -224,12 +230,12 @@ class Object(Entity):
     #: :attr:`attachment` and :attr:`tag` is that the former implies
     #: association by inclusion, while the latter implies associated
     #: by reference.
-    tag: Optional[Union[Link, "Object"]] = singular_property(
+    tag: Optional[Union[EntityRef, Link, "Object"]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#tag")
     )
 
     #: Plural accessor for :attr:`tag`.
-    tags: Sequence[Union[Link, "Object"]] = plural_property(
+    tags: Sequence[Union[EntityRef, Link, "Object"]] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#tag")
     )
 
@@ -250,45 +256,45 @@ class Object(Entity):
 
     #: Identifies an entity considered to be part of the public primary
     #: audience of an :class:`Object`.
-    to: Optional[Union[Link, "Object"]] = singular_property(
+    to: Optional[Union[EntityRef, Link, "Object"]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#to")
     )
 
     #: Plural accessor for :attr:`to`.
-    tos: Sequence[Union[Link, "Object"]] = plural_property(
+    tos: Sequence[Union[EntityRef, Link, "Object"]] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#to")
     )
 
     #: Identifies an entity considered to be part of the public primary
     #: audience of an :class:`Object`.
-    bto: Optional[Union[Link, "Object"]] = singular_property(
+    bto: Optional[Union[EntityRef, Link, "Object"]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#bto")
     )
 
     #: Plural accessor for :attr:`bto`.
-    btos: Sequence[Union[Link, "Object"]] = plural_property(
+    btos: Sequence[Union[EntityRef, Link, "Object"]] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#bto")
     )
 
     #: Identifies an :class:`Object` that is part of the public secondary
     #: audience of this :class:`Object`.
-    cc: Optional[Union[Link, "Object"]] = singular_property(
+    cc: Optional[Union[EntityRef, Link, "Object"]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#cc")
     )
 
     #: Plural accessor for :attr:`cc`.
-    ccs: Sequence[Union[Link, "Object"]] = plural_property(
+    ccs: Sequence[Union[EntityRef, Link, "Object"]] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#cc")
     )
 
     #: Singular accessor for :attr:`bccs`.
-    bcc: Optional[Union[Link, "Object"]] = singular_property(
+    bcc: Optional[Union[EntityRef, Link, "Object"]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#bcc")
     )
 
     #: Identifies one or more :class:`Object`\ s that are part of the private
     #: secondary audience of this :class:`Object`.
-    bccs: Sequence[Union[Link, "Object"]] = plural_property(
+    bccs: Sequence[Union[EntityRef, Link, "Object"]] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#bcc")
     )
 
@@ -325,12 +331,12 @@ class Object(Entity):
     #:    ActivityPub --- `3.3 The source property`__
     #:
     #:    __ https://www.w3.org/TR/activitypub/#source-property
-    source: Optional["Object"] = singular_property(
+    source: Optional[Union[EntityRef, "Object"]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#source")
     )
 
     #: Plural accessor for :attr:`source`.
-    sources: Sequence["Object"] = plural_property(
+    sources: Sequence[Union[EntityRef, "Object"]] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#source")
     )
 
@@ -364,7 +370,7 @@ class Object(Entity):
     #:    ActivityPub --- `5.7 Likes Collection`__
     #:
     #:    __ https://www.w3.org/TR/activitypub/#likes
-    likes: Optional["Collection"] = singular_property(
+    likes: Optional[Union[EntityRef, "Collection"]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#likes")
     )
 
@@ -381,7 +387,7 @@ class Object(Entity):
     #:    ActivityPub --- `5.8 Shares Collection`__
     #:
     #:    __ https://www.w3.org/TR/activitypub/#shares
-    shares: Optional["Collection"] = singular_property(
+    shares: Optional[Union[EntityRef, "Collection"]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#shares")
     )
 
@@ -483,7 +489,7 @@ class Profile(Object):
 
     #: On a :class:`Profile` object, the describes property identifies
     #: the object described by the :class:`Profile`.
-    describes: Optional[Object] = singular_property(
+    describes: Optional[EntityRef | Object] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#describes")
     )
 
@@ -505,17 +511,17 @@ class Relationship(Object):
     #: identifies one of the connected individuals.  For instance,
     #: for a ``Relationship`` object describing "John is related to Sally",
     #: ``subject`` would refer to John.
-    subject: Optional[Link | Object] = singular_property(
+    subject: Optional[EntityRef | Link | Object] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#subject")
     )
 
     #: Describes the entity to which the :attr:`subject` is related.
-    object: Optional[Object | Link] = singular_property(
+    object: Optional[EntityRef | Object | Link] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#object")
     )
 
     #: Plural accessor for :attr:`object`.
-    objects: Sequence[Object | Link] = plural_property(
+    objects: Sequence[EntityRef | Object | Link] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#object")
     )
 
@@ -528,12 +534,12 @@ class Relationship(Object):
     #:    According to the specification, its domain is ``Object``.  However,
     #:    the example in the specification shows it can have a value of
     #:    ``xsd:anyURI``.  Hence, we use ``Object | Uri`` here.
-    relationship: Optional[Object | Uri] = singular_property(
+    relationship: Optional[EntityRef | Object | Uri] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#relationship")
     )
 
     #: Plural accessor for :attr:`relationship`.
-    relationships: Sequence[Object | Uri] = plural_property(
+    relationships: Sequence[EntityRef | Object | Uri] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#relationship")
     )
 
@@ -558,12 +564,12 @@ class Tombstone(Object):
     #:    See also the `related issue`__.
     #:
     #:    __ https://github.com/w3c/activitystreams/issues/440
-    former_type: Optional[Object | Uri] = singular_property(
+    former_type: Optional[EntityRef | Object | Uri] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#formerType")
     )
 
     #: Plural accessor for :attr:`former_type`.
-    former_types: Sequence[Object | Uri] = plural_property(
+    former_types: Sequence[EntityRef | Object | Uri] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#formerType")
     )
 

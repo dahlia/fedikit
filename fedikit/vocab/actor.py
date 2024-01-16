@@ -2,7 +2,7 @@ from collections.abc import Sequence
 from typing import Optional
 
 from ..model.descriptors import plural_property, singular_property
-from ..model.entity import Entity
+from ..model.entity import Entity, EntityRef
 from ..model.langstr import LanguageString
 from ..uri import Uri
 from .collection import Collection, OrderedCollection
@@ -46,7 +46,7 @@ class Actor(Object):
     #:    ActivityPub --- `5.2 Inbox`__
     #:
     #:    __ https://www.w3.org/TR/activitypub/#inbox
-    inbox: Optional[OrderedCollection] = singular_property(
+    inbox: Optional[EntityRef | OrderedCollection] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#inbox")
     )
 
@@ -67,7 +67,7 @@ class Actor(Object):
     #:    ActivityPub --- `5.1 Outbox`__
     #:
     #:    __ https://www.w3.org/TR/activitypub/#outbox
-    outbox: Optional[OrderedCollection] = singular_property(
+    outbox: Optional[EntityRef | OrderedCollection] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#outbox")
     )
 
@@ -84,7 +84,7 @@ class Actor(Object):
     #:    ActivityPub --- `5.4 Following Collection`__
     #:
     #:    __ https://www.w3.org/TR/activitypub/#following
-    following: Optional[Collection] = singular_property(
+    following: Optional[EntityRef | Collection] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#following")
     )
 
@@ -102,7 +102,7 @@ class Actor(Object):
     #:    ActivityPub --- `5.3 Followers Collection`__
     #:
     #:    __ https://www.w3.org/TR/activitypub/#followers
-    followers: Optional[Collection] = singular_property(
+    followers: Optional[EntityRef | Collection] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#followers")
     )
 
@@ -119,7 +119,7 @@ class Actor(Object):
     #:    ActivityPub --- `5.5 Liked Collection`__
     #:
     #:    __ https://www.w3.org/TR/activitypub/#liked
-    liked: Optional[Collection] = singular_property(
+    liked: Optional[EntityRef | Collection] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#liked")
     )
 
@@ -130,7 +130,7 @@ class Actor(Object):
     #:    ActivityPub --- `4.1 Actor objects`__
     #:
     #:    __ https://www.w3.org/TR/activitypub/#actor-objects
-    streams: Sequence[Collection] = plural_property(
+    streams: Sequence[EntityRef | Collection] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#streams")
     )
 

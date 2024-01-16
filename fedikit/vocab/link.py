@@ -4,7 +4,7 @@ from typing import Optional, Union
 from langcodes import Language
 
 from ..model.descriptors import id_property, plural_property, singular_property
-from ..model.entity import Entity
+from ..model.entity import Entity, EntityRef
 from ..model.langstr import LanguageString
 from ..uri import Uri
 
@@ -91,12 +91,12 @@ class Link(Entity):
     )
 
     #: Identifies an entity that provides a preview of this object.
-    preview: Optional[Union["Link", "Object"]] = singular_property(
+    preview: Optional[Union[EntityRef, "Link", "Object"]] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#preview")
     )
 
     #: Plural accessor for :attr:`preview`.
-    previews: Sequence[Union["Link", "Object"]] = plural_property(
+    previews: Sequence[Union[EntityRef, "Link", "Object"]] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#preview")
     )
 

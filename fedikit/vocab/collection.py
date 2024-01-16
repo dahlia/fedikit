@@ -2,6 +2,7 @@ from collections.abc import Sequence
 from typing import Optional, Union
 
 from ..model.descriptors import plural_property, singular_property
+from ..model.entity import EntityRef
 from ..uri import Uri
 from .link import Link
 from .object import Object
@@ -37,25 +38,25 @@ class Collection(Object):
 
     #: In a paged :class:`Collection`, indicates the page that contains
     #: the most recently updated member items.
-    current: Optional[Union["CollectionPage", Link]] = singular_property(
-        Uri("https://www.w3.org/ns/activitystreams#current")
+    current: Optional[Union[EntityRef, "CollectionPage", Link]] = (
+        singular_property(Uri("https://www.w3.org/ns/activitystreams#current"))
     )
 
     #: In a paged :class:`Collection`, indicates the furthest preceding page of
     #: items in the collection.
-    first: Optional[Union["CollectionPage", Link]] = singular_property(
-        Uri("https://www.w3.org/ns/activitystreams#first")
+    first: Optional[Union[EntityRef, "CollectionPage", Link]] = (
+        singular_property(Uri("https://www.w3.org/ns/activitystreams#first"))
     )
 
     #: In a paged :class:`Collection`, indicates the furthest proceeding page
     #: of the collection.
-    last: Optional[Union["CollectionPage", Link]] = singular_property(
-        Uri("https://www.w3.org/ns/activitystreams#last")
+    last: Optional[Union[EntityRef, "CollectionPage", Link]] = (
+        singular_property(Uri("https://www.w3.org/ns/activitystreams#last"))
     )
 
     #: Identifies the items contained in a collection.  The items might be
     #: ordered or unordered.
-    items: Sequence[Object | Link] = plural_property(
+    items: Sequence[EntityRef | Object | Link] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#items")
     )
 
@@ -69,7 +70,7 @@ class OrderedCollection(Collection):
 
     #: Identifies the items contained in a collection.  The items might be
     #: ordered or unordered.
-    items: Sequence[Object | Link] = plural_property(
+    items: Sequence[EntityRef | Object | Link] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#items"),
         subproperties=[
             Uri("https://www.w3.org/ns/activitystreams#orderedItems")
@@ -78,7 +79,7 @@ class OrderedCollection(Collection):
 
     #: Identifies the items contained in a collection.  The items must be
     #: ordered.
-    ordered_items: Sequence[Object | Link] = plural_property(
+    ordered_items: Sequence[EntityRef | Object | Link] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#orderedItems")
     )
 
@@ -95,18 +96,18 @@ class CollectionPage(Collection):
 
     #: Identifies the :class:`Collection` to which a :class:`CollectionPage`
     #: objects items belong.
-    part_of: Optional[Link | Collection] = singular_property(
+    part_of: Optional[EntityRef | Link | Collection] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#partOf")
     )
 
     #: In a paged :class:`Collection`, indicates the next page of items.
-    next: Optional[Union["CollectionPage", Link]] = singular_property(
-        Uri("https://www.w3.org/ns/activitystreams#next")
+    next: Optional[Union[EntityRef, "CollectionPage", Link]] = (
+        singular_property(Uri("https://www.w3.org/ns/activitystreams#next"))
     )
 
     #: In a paged :class:`Collection`, identifies the previous page of items.
-    prev: Optional[Union["CollectionPage", Link]] = singular_property(
-        Uri("https://www.w3.org/ns/activitystreams#prev")
+    prev: Optional[Union[EntityRef, "CollectionPage", Link]] = (
+        singular_property(Uri("https://www.w3.org/ns/activitystreams#prev"))
     )
 
 

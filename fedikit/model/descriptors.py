@@ -123,13 +123,9 @@ class PluralProperty(ResourceProperty):
     ) -> Self | Sequence[Any]:
         if instance is None:
             return self
-        from .entity import EntityRef
-
         values = []
         for uri in (self.uri, *self.subproperties):
             for v in instance._values.get(uri, []):
-                if isinstance(v, EntityRef):
-                    continue
                 values.append(v)
         return values
 
@@ -212,12 +208,9 @@ class SingularProperty(ResourceProperty):
     def __get__(self, instance: Any | None, cls: type["Entity"]) -> Self | Any:
         if instance is None:
             return self
-        from .entity import EntityRef
-
         for uri in (self.uri, *self.subproperties):
             for v in instance._values.get(uri, []):
-                if not isinstance(v, EntityRef):
-                    return v
+                return v
         return None
 
     def normalize(self, value: Any) -> "Slot":

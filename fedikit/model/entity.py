@@ -172,7 +172,7 @@ class Entity:
                 continue
             doc[uri] = [
                 (
-                    {"@id": v}
+                    {"@id": v.uri}
                     if isinstance(v, EntityRef)
                     else await to_jsonld(v, expand=True, loader=loader)
                 )

@@ -2,6 +2,7 @@ from collections.abc import Sequence
 from typing import Optional
 
 from ..model.descriptors import plural_property, singular_property
+from ..model.entity import EntityRef
 from ..uri import Uri
 from .link import Link
 from .object import Object
@@ -51,25 +52,25 @@ class Activity(Object):
     #: perform the activity.  Any single activity can have multiple
     #: ``actor``\ s.  The ``actor`` *may* be specified using an indirect
     #: :class:`Link`.
-    actor: Optional[Object | Link] = singular_property(
+    actor: Optional[EntityRef | Object | Link] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#actor")
     )
 
     #: Plural accessor for :attr:`actor`.
-    actors: Sequence[Object | Link] = plural_property(
+    actors: Sequence[EntityRef | Object | Link] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#actor")
     )
 
     #: Identifies one or more entities to which this object is attributed.
     #: The attributed entities might not be :class:`Actor`\ s.  For instance,
     #: an object might be attributed to the completion of another activity.
-    attributed_to: Optional[Object | Link] = singular_property(
+    attributed_to: Optional[EntityRef | Object | Link] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#attributedTo"),
         subproperties=[Uri("https://www.w3.org/ns/activitystreams#actor")],
     )
 
     #: Plural accessor for :attr:`attributed_to`.
-    attributed_tos: Sequence[Object | Link] = plural_property(
+    attributed_tos: Sequence[EntityRef | Object | Link] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#attributedTo"),
         subproperties=[Uri("https://www.w3.org/ns/activitystreams#actor")],
     )
@@ -77,12 +78,12 @@ class Activity(Object):
     #: Describes the direct object of the activity.  For instance, in the
     #: activity "John added a movie to his wishlist", the object of
     #: the activity is the movie added.
-    object: Optional[Object | Link] = singular_property(
+    object: Optional[EntityRef | Object | Link] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#object")
     )
 
     #: Plural accessor for :attr:`object`.
-    objects: Sequence[Object | Link] = plural_property(
+    objects: Sequence[EntityRef | Object | Link] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#object")
     )
 
@@ -92,24 +93,24 @@ class Activity(Object):
     #: For instance, in the activity "John added a movie to his wishlist",
     #: the target of the activity is John's wishlist.  An activity can have
     #: more than one target.
-    target: Optional[Object | Link] = singular_property(
+    target: Optional[EntityRef | Object | Link] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#target")
     )
 
     #: Plural accessor for :attr:`target`.
-    targets: Sequence[Object | Link] = plural_property(
+    targets: Sequence[EntityRef | Object | Link] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#target")
     )
 
     #: Describes the result of the activity.  For instance, if a particular
     #: action results in the creation of a new resource, the result property
     #: can be used to describe that new resource.
-    result: Optional[Object | Link] = singular_property(
+    result: Optional[EntityRef | Object | Link] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#result")
     )
 
     #: Plural accessor for :attr:`result`.
-    results: Sequence[Object | Link] = plural_property(
+    results: Sequence[EntityRef | Object | Link] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#result")
     )
 
@@ -118,23 +119,23 @@ class Activity(Object):
     #: the English preposition "from".  For instance, in the activity
     #: "John moved an item to List B from List A", the origin of the activity
     #: is "List A".
-    origin: Optional[Object | Link] = singular_property(
+    origin: Optional[EntityRef | Object | Link] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#origin")
     )
 
     #: Plural accessor for :attr:`origin`.
-    origins: Sequence[Object | Link] = plural_property(
+    origins: Sequence[EntityRef | Object | Link] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#origin")
     )
 
     #: Identifies one or more objects used (or to be used) in the completion of
     #: an :class:`Activity`.
-    instrument: Optional[Object | Link] = singular_property(
+    instrument: Optional[EntityRef | Object | Link] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#instrument")
     )
 
     #: Plural accessor for :attr:`instrument`.
-    instruments: Sequence[Object | Link] = plural_property(
+    instruments: Sequence[EntityRef | Object | Link] = plural_property(
         Uri("https://www.w3.org/ns/activitystreams#instrument")
     )
 

@@ -65,7 +65,10 @@ async def test_object_from_jsonld(document_loader: DocumentLoader) -> None:
     )
     assert isinstance(parsed2, Object)
     assert parsed2.name == "foo"
-    assert parsed2.attachments == [Link(href=Uri("https://example.com/"))]
+    assert parsed2.attachments == [
+        EntityRef("https://example.com/foo"),
+        Link(href=Uri("https://example.com/")),
+    ]
     assert parsed2.duration is None
     assert parsed2.replies is None
 
@@ -263,7 +266,7 @@ def test_object_repr():
             Object(
                 names=["foo", "bar"],
                 attachments=[
-                    EntityRef("https://example.com/"),  # type: ignore
+                    EntityRef("https://example.com/"),
                     Object(name="baz"),
                 ],
             )
