@@ -85,14 +85,18 @@ async def count_outbox(
     return 3
 
 
-@pytest.fixture
-def client() -> ASGITestClient:
+def get_client(server: Server[CtxData]) -> ASGITestClient:
     asgi_app = cast(TASGIApp, server.asgi(CtxData(actors)))
     client = ASGITestClient(asgi_app, "http://fedikit.test")
     client.headers = {
         "Host": "fedikit.test",
     }
     return client
+
+
+@pytest.fixture
+def client() -> ASGITestClient:
+    return get_client(server)
 
 
 @pytest.mark.asyncio
@@ -227,6 +231,39 @@ async def test_outbox_dispatcher(client: ASGITestClient) -> None:
                 },
             },
         ],
+    }
+
+
+@pytest.mark.asyncio
+async def test_outbox_first_last_cursor() -> None:
+    server2 = server.clone()
+
+    @server2.outbox_first_cursor
+    def first_cursor(context: Context[CtxData], handle: str) -> Optional[str]:
+        if handle not in context.data.actors:
+            return None
+        return "0"
+
+    @server2.outbox_last_cursor
+    def last_cursor(context: Context[CtxData], handle: str) -> Optional[str]:
+        if handle not in context.data.actors:
+            return None
+        return "2"
+
+    client = get_client(server2)
+    alice = await client.request("/actors/alice/outbox", "GET")
+    assert alice.status_code == 200
+    assert (
+        alice.content_type
+        == "application/ld+json;"
+        ' profile="https://www.w3.org/ns/activitystreams"'
+    )
+    assert await alice.json() == {
+        "@context": "https://www.w3.org/ns/activitystreams",
+        "first": "http://fedikit.test/actors/alice/outbox?cursor=0",
+        "last": "http://fedikit.test/actors/alice/outbox?cursor=2",
+        "totalItems": 3,
+        "type": "OrderedCollection",
     }
 
 

@@ -23,4 +23,14 @@
       </footer>
     </article>
   {% endfor %}
+  <nav>
+    <ul>
+      {% if prev is not none %}
+        <li><a href="{{ url_for("index", **prev) }}">Previous</a></li>
+      {% endif %}
+      {% if next is not none %}
+        <li><a href="{{ url_for("index", **next) }}">Next</a></li>
+      {% endif %}
+    </ul>
+  </nav>
 {% endblock %}

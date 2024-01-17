@@ -12,6 +12,7 @@ from quart import (
 from .data import Metadata
 from .db import (
     add_post,
+    count_posts,
     get_metadata,
     get_post,
     get_posts,
@@ -43,9 +44,18 @@ async def index() -> ResponseReturnValue:
         if not await has_initialized(db):
             return redirect(url_for("setup"))
         metadata = await get_metadata(db)
-        posts = [post async for post in get_posts(db)]
+        offset = request.args.get("offset", 0, int)
+        limit = 5
+        total = await count_posts(db)
+        posts = [post async for post in get_posts(db, offset, limit)]
+        prev = (
+            None
+            if offset < 1
+            else ({"offset": offset - limit} if offset > limit else {})
+        )
+        next_ = {"offset": offset + limit} if offset + limit < total else None
         return await render_template(
-            "index.html", metadata=metadata, posts=posts
+            "index.html", metadata=metadata, posts=posts, prev=prev, next=next_
         )
 
 

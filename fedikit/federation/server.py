@@ -9,9 +9,11 @@ from typing import (
     Generic,
     Optional,
     Protocol,
+    Self,
     TypeAlias,
     TypeVar,
 )
+from urllib.parse import quote
 
 from hypercorn.typing import ASGIReceiveCallable, ASGISendCallable, Scope
 from werkzeug.datastructures import Headers
@@ -20,11 +22,12 @@ from werkzeug.routing import Map, MapAdapter, Rule
 from werkzeug.sansio.request import Request
 
 from ..model.converters import jsonld
+from ..model.entity import EntityRef
 from ..uri import Uri
 from ..vocab import link
 from ..vocab.activity import Activity
 from ..vocab.actor import Actor
-from ..vocab.collection import OrderedCollection
+from ..vocab.collection import OrderedCollection, OrderedCollectionPage
 from ..webfinger.jrd import Link, MediaType, ResourceDescriptor
 from .collection import Page
 
@@ -182,6 +185,16 @@ class OutboxCounter(Protocol[TContextData]):
     ) -> Optional[int] | Awaitable[Optional[int]]: ...
 
 
+class OutboxCursor(Protocol[TContextData]):
+    """A protocol for callables that return a cursor for an outbox."""
+
+    def __call__(
+        self,
+        context: Context[TContextData],
+        handle: str,
+    ) -> Optional[str] | Awaitable[Optional[str]]: ...
+
+
 class Server(Generic[TContextData]):
     """A server to handle requests from the fediverse."""
 
@@ -189,6 +202,8 @@ class Server(Generic[TContextData]):
     _actor_dispatcher: Optional[ActorDispatcher[TContextData]]
     _outbox_dispatcher: Optional[OutboxDispatcher[TContextData]]
     _outbox_counter: Optional[OutboxCounter[TContextData]]
+    _outbox_first_cursor: Optional[OutboxCursor[TContextData]]
+    _outbox_last_cursor: Optional[OutboxCursor[TContextData]]
 
     def __init__(self) -> None:
         self._map = Map([
@@ -197,6 +212,22 @@ class Server(Generic[TContextData]):
         self._actor_dispatcher = None
         self._outbox_dispatcher = None
         self._outbox_counter = None
+        self._outbox_first_cursor = None
+        self._outbox_last_cursor = None
+
+    def clone(self) -> Self:
+        """Copy the server.
+
+        :return: A copy of the server.
+        """
+        clone = type(self)()
+        clone._map = Map(rule.empty() for rule in self._map.iter_rules())
+        clone._actor_dispatcher = self._actor_dispatcher
+        clone._outbox_dispatcher = self._outbox_dispatcher
+        clone._outbox_counter = self._outbox_counter
+        clone._outbox_first_cursor = self._outbox_first_cursor
+        clone._outbox_last_cursor = self._outbox_last_cursor
+        return clone
 
     def actor_dispatcher(
         self, path: str
@@ -247,6 +278,20 @@ class Server(Generic[TContextData]):
         self._outbox_counter = count
         return count
 
+    def outbox_first_cursor(
+        self, cursor: OutboxCursor[TContextData]
+    ) -> OutboxCursor[TContextData]:
+        """A decorator to register an outbox first cursor."""
+        self._outbox_first_cursor = cursor
+        return cursor
+
+    def outbox_last_cursor(
+        self, cursor: OutboxCursor[TContextData]
+    ) -> OutboxCursor[TContextData]:
+        """A decorator to register an outbox last cursor."""
+        self._outbox_last_cursor = cursor
+        return cursor
+
     async def dispatch_actor(
         self, context: Context[TContextData], handle: str
     ) -> Optional[Actor]:
@@ -291,7 +336,7 @@ class Server(Generic[TContextData]):
         :param context: The context for the request.
         :param handle: The actor's handle whose outbox to count.
         :return: The number of items in the outbox, or ``None`` if no outbox was
-            found.
+            found or the outbox has no counter.
         """
         if self._outbox_counter is None:
             return None
@@ -299,6 +344,40 @@ class Server(Generic[TContextData]):
         if total_items is None or isinstance(total_items, int):
             return total_items
         return await total_items
+
+    async def get_outbox_first_cursor(
+        self, context: Context[TContextData], handle: str
+    ) -> Optional[str]:
+        """Get the first cursor of an outbox using the registered outbox first cursor.
+
+        :param context: The context for the request.
+        :param handle: The actor's handle whose outbox to get the first cursor.
+        :return: The first cursor of the outbox, or ``None`` if no outbox was
+            found or the outbox has no first cursor.
+        """
+        if self._outbox_first_cursor is None:
+            return None
+        cursor = self._outbox_first_cursor(context, handle)
+        if cursor is None or isinstance(cursor, str):
+            return cursor
+        return await cursor
+
+    async def get_outbox_last_cursor(
+        self, context: Context[TContextData], handle: str
+    ) -> Optional[str]:
+        """Get the last cursor of an outbox using the registered outbox last cursor.
+
+        :param context: The context for the request.
+        :param handle: The actor's handle whose outbox to get the last cursor.
+        :return: The last cursor of the outbox, or ``None`` if no outbox was
+            found or the outbox has no last cursor.
+        """
+        if self._outbox_last_cursor is None:
+            return None
+        cursor = self._outbox_last_cursor(context, handle)
+        if cursor is None or isinstance(cursor, str):
+            return cursor
+        return await cursor
 
     def asgi(
         self,
@@ -553,16 +632,64 @@ class ServerAsgi(Generic[TContextData]):
         send: ASGISendCallable,
     ) -> None:
         handle = args["handle"]
-        page: Optional[Page[Activity]] = await self.server.dispatch_outbox(
-            context, handle, cursor=None  # TODO
-        )
-        if page is None:
-            return await self.on_not_found(scope, receive, send)
-        _, _, items = page
-        collection = OrderedCollection(
-            total_items=await self.server.count_outbox(context, handle),
-            ordered_items=items,
-        )
+        cursor = context.request.args.get("cursor")
+        if cursor is None:
+            first_cursor = await self.server.get_outbox_first_cursor(
+                context, handle
+            )
+            last_cursor = await self.server.get_outbox_last_cursor(
+                context, handle
+            )
+            total_items = await self.server.count_outbox(context, handle)
+            if first_cursor is None:
+                page: Optional[Page[Activity]] = (
+                    await self.server.dispatch_outbox(
+                        context, handle, cursor=None
+                    )
+                )
+                if page is None:
+                    return await self.on_not_found(scope, receive, send)
+                _, _, items = page
+                collection = OrderedCollection(
+                    total_items=total_items,
+                    ordered_items=items,
+                )
+            else:
+                collection = OrderedCollection(
+                    total_items=total_items,
+                    first=EntityRef(
+                        f"{context.outbox_uri(handle)}?cursor={quote(first_cursor)}"
+                    ),
+                    last=(
+                        None
+                        if last_cursor is None
+                        else EntityRef(
+                            f"{context.outbox_uri(handle)}?cursor={quote(last_cursor)}"
+                        )
+                    ),
+                )
+        else:
+            page = await self.server.dispatch_outbox(context, handle, cursor)
+            if page is None:
+                return await self.on_not_found(scope, receive, send)
+            prev_cursor, next_cursor, items = page
+            collection = OrderedCollectionPage(
+                prev=(
+                    None
+                    if prev_cursor is None
+                    else EntityRef(
+                        f"{context.outbox_uri(handle)}?cursor={quote(prev_cursor)}"
+                    )
+                ),
+                next=(
+                    None
+                    if next_cursor is None
+                    else EntityRef(
+                        f"{context.outbox_uri(handle)}?cursor={quote(next_cursor)}"
+                    )
+                ),
+                ordered_items=items,
+            )
         doc = await jsonld(collection)
         await send({
             "type": "http.response.start",

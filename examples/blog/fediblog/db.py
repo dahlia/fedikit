@@ -71,9 +71,17 @@ async def add_post(db: Connection, content: str) -> None:
     await db.execute("INSERT INTO posts (content) VALUES (?)", (content,))
 
 
-async def get_posts(db: Connection) -> AsyncIterable[Post]:
+async def get_posts(
+    db: Connection,
+    offset: int = 0,
+    limit: int = 5,
+) -> AsyncIterable[Post]:
     cursor = await db.execute(
-        "SELECT id, content, published FROM posts ORDER BY id DESC"
+        """
+        SELECT id, content, published FROM posts
+        ORDER BY id DESC LIMIT ?, ?
+        """,
+        (offset, limit),
     )
     async with cursor:
         async for row in cursor:

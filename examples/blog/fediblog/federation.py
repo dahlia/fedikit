@@ -1,7 +1,7 @@
 from collections.abc import Mapping
 from dataclasses import dataclass
 from html import escape
-from typing import Any, Optional
+from typing import Any, Final, Optional
 
 from aiosqlite import Connection, connect
 from fedikit.federation.collection import Page
@@ -68,16 +68,22 @@ async def dispatch_actor(
         )
 
 
+PAGE_WINDOW: Final[int] = 5
+
+
 @server.outbox_dispatcher("/actors/<handle>/outbox/")
 async def dispatch_outbox(
     context: Context[CtxData], handle: str, cursor: Optional[str]
 ) -> Optional[Page[Activity]]:
+    if cursor is None:
+        return None
+    offset = int(cursor)
     async with context.data.connect_db() as db:
         metadata = await get_metadata(db)
         if metadata.handle != handle:
             return None
         activities: list[Activity] = []
-        async for post in get_posts(db):
+        async for post in get_posts(db, offset=offset, limit=PAGE_WINDOW):
             activity = Create(
                 actor=EntityRef(context.actor_uri(handle)),
                 object=Note(
@@ -89,10 +95,34 @@ async def dispatch_outbox(
                 ),
             )
             activities.append(activity)
-        return Page(None, None, activities)
+        total = await count_posts(db)
+        return Page(
+            prev_cursor=(
+                None
+                if offset < 1
+                else str(offset - PAGE_WINDOW if offset > PAGE_WINDOW else 0)
+            ),
+            next_cursor=(
+                str(offset + PAGE_WINDOW)
+                if offset + PAGE_WINDOW < total
+                else None
+            ),
+            items=activities,
+        )
 
 
 @server.outbox_counter
 async def count_outbox(context: Context[CtxData], handle: str) -> int:
     async with context.data.connect_db() as db:
         return await count_posts(db)
+
+
+@server.outbox_first_cursor
+async def first_outbox_cursor(context: Context[CtxData], handle: str) -> str:
+    return "0"
+
+
+@server.outbox_last_cursor
+async def last_outbox_cursor(context: Context[CtxData], handle: str) -> str:
+    async with context.data.connect_db() as db:
+        return str((await count_posts(db) // PAGE_WINDOW) * PAGE_WINDOW)
