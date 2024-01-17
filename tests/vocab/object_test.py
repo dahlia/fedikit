@@ -180,6 +180,17 @@ async def test_object_name(document_loader: DocumentLoader) -> None:
         "nameMap": {"zh": "你好"},
     }
 
+    obj3 = Object(name=None)
+    assert obj3.name is None
+    assert obj3.names == []
+    assert await jsonld(obj3, expand=True, loader=document_loader) == {
+        "@type": ["https://www.w3.org/ns/activitystreams#Object"],
+    }
+    assert await jsonld(obj3, loader=document_loader) == {
+        "@context": "https://www.w3.org/ns/activitystreams",
+        "type": "Object",
+    }
+
 
 @pytest.mark.asyncio
 async def test_object_names(document_loader: DocumentLoader) -> None:

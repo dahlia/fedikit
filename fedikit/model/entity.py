@@ -170,6 +170,8 @@ class Entity:
             if isinstance(slot, str):
                 doc[uri] = slot
                 continue
+            elif not slot:
+                continue
             doc[uri] = [
                 (
                     {"@id": v.uri}

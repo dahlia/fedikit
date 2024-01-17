@@ -214,7 +214,7 @@ class SingularProperty(ResourceProperty):
         return None
 
     def normalize(self, value: Any) -> "Slot":
-        return [(value)]
+        return [] if value is None else [(value)]
 
     def check_slot(self, slot: "Slot") -> bool:
         return not isinstance(slot, str) and len(slot) == 1
