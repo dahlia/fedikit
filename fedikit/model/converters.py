@@ -1,6 +1,12 @@
 from datetime import datetime
 from typing import Any, Mapping, NewType, Optional, TypeVar, Union
 
+from cryptography.hazmat.primitives.asymmetric.types import PublicKeyTypes
+from cryptography.hazmat.primitives.serialization import (
+    Encoding,
+    PublicFormat,
+    load_pem_public_key,
+)
 from isoduration import format_duration, parse_duration
 from isoduration.types import Duration
 from langcodes import Language
@@ -54,6 +60,12 @@ async def jsonld(
             return {"@value": str(value)}
         case Duration():
             return {"@value": format_duration(value)}
+        case _ if isinstance(value, PublicKeyTypes):  # type: ignore
+            return {
+                "@value": value.public_bytes(  # type: ignore
+                    Encoding.PEM, PublicFormat.SubjectPublicKeyInfo
+                ).decode("ascii")
+            }
     raise TypeError(f"cannot convert {type(value).__name__} to JSON-LD")
 
 
@@ -96,6 +108,10 @@ async def from_jsonld(
         return Language.get(document["@value"])  # type: ignore
     elif issubclass(cls, Duration):
         return parse_duration(document["@value"])  # type: ignore
+    elif issubclass(cls, PublicKeyTypes):  # type: ignore
+        return load_pem_public_key(  # type: ignore
+            document["@value"].encode("ascii")
+        )
     raise ValueError(f"cannot convert JSON-LD to {cls.__name__}")
 
 

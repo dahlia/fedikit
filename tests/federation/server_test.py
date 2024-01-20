@@ -162,7 +162,10 @@ async def test_actor_dispatcher(client: ASGITestClient) -> None:
         ' profile="https://www.w3.org/ns/activitystreams"'
     )
     assert await alice.json() == {
-        "@context": "https://www.w3.org/ns/activitystreams",
+        "@context": [
+            "https://www.w3.org/ns/activitystreams",
+            "https://w3id.org/security/v1",
+        ],
         "id": "http://fedikit.test/actors/alice",
         "type": "Person",
         "preferredUsername": "alice",
@@ -179,7 +182,10 @@ async def test_actor_dispatcher(client: ASGITestClient) -> None:
         ' profile="https://www.w3.org/ns/activitystreams"'
     )
     assert await bob.json() == {
-        "@context": "https://www.w3.org/ns/activitystreams",
+        "@context": [
+            "https://www.w3.org/ns/activitystreams",
+            "https://w3id.org/security/v1",
+        ],
         "id": "http://fedikit.test/actors/bob",
         "type": "Person",
         "preferredUsername": "bob",

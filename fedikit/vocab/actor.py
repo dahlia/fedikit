@@ -1,7 +1,9 @@
 from collections.abc import Sequence
 from typing import Optional
 
-from ..model.descriptors import plural_property, singular_property
+from cryptography.hazmat.primitives.asymmetric.types import PublicKeyTypes
+
+from ..model.descriptors import id_property, plural_property, singular_property
 from ..model.entity import Entity, EntityRef
 from ..model.langstr import LanguageString
 from ..uri import Uri
@@ -13,6 +15,7 @@ __all__ = [
     "Application",
     "Endpoints",
     "Group",
+    "Key",
     "Organization",
     "Person",
     "Service",
@@ -25,7 +28,10 @@ class Actor(Object):
     """
 
     __abstract__ = True
-    __default_context__ = Uri("https://www.w3.org/ns/activitystreams")
+    __default_context__ = [
+        Uri("https://www.w3.org/ns/activitystreams"),
+        Uri("https://w3id.org/security/v1"),
+    ]
 
     #: The inbox stream contains all activities received by the actor.
     #: The server *should* filter content according to the requester's
@@ -177,6 +183,17 @@ class Actor(Object):
         Uri("https://www.w3.org/ns/activitystreams#manuallyApprovesFollowers")
     )
 
+    #: A public key which may be used to verify signatures on activities
+    #: made by this actor.
+    public_key: Optional["Key"] = singular_property(
+        Uri("https://w3id.org/security#publicKey")
+    )
+
+    #: Plural accessor for :attr:`public_key`.
+    public_keys: Sequence["Key"] = plural_property(
+        Uri("https://w3id.org/security#publicKey")
+    )
+
 
 class Application(Actor):
     """Describes a software application."""
@@ -283,4 +300,26 @@ class Endpoints(Entity):
     #: __ https://www.w3.org/TR/activitypub/#public-addressing
     shared_box: Optional[Uri] = singular_property(
         Uri("https://www.w3.org/ns/activitystreams#sharedInbox")
+    )
+
+
+class Key(Entity):
+    """This class represents a cryptographic key that may be used for
+    encryption, decryption, or digitally signing data.
+    """
+
+    __abstract__ = False
+    __uri__ = Uri("https://w3id.org/security#Key")
+
+    #: Provides the globally unique identifier for a :class:`PublicKey`.
+    id: Uri = id_property()
+
+    #: The owner of the key pair.
+    owner: Optional[EntityRef | Actor] = singular_property(
+        Uri("https://w3id.org/security#owner")
+    )
+
+    #: The content of the public key in PEM-encoded form.
+    public_key: Optional[PublicKeyTypes] = singular_property(
+        Uri("https://w3id.org/security#publicKeyPem")
     )

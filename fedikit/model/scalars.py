@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import TypeAlias
 
+from cryptography.hazmat.primitives.asymmetric.types import PublicKeyTypes
 from isoduration.types import Duration
 from langcodes import Language
 
@@ -20,4 +21,5 @@ ScalarValue: TypeAlias = (
     | Language
     | LanguageString
     | Duration
+    | PublicKeyTypes
 )

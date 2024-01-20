@@ -1,6 +1,6 @@
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from datetime import datetime
-from typing import Literal, Optional, Union
+from typing import Any, ClassVar, Literal, Optional, Union
 
 from isoduration.types import Duration
 
@@ -32,7 +32,9 @@ class Object(Entity):
 
     __abstract__ = False
     __uri__ = Uri("https://www.w3.org/ns/activitystreams#Object")
-    __default_context__ = Uri("https://www.w3.org/ns/activitystreams")
+    __default_context__: ClassVar[Uri | Sequence[Uri] | Mapping[str, Any]] = (
+        Uri("https://www.w3.org/ns/activitystreams")
+    )
 
     #: Provides the globally unique identifier for an :class:`Object`.
     id: Uri = id_property()
