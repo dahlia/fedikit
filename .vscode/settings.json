@@ -68,5 +68,6 @@
     "subproperty",
     "webfinger",
     "werkzeug"
-  ]
+  ],
+  "esbonio.sphinx.confDir": ""
 }

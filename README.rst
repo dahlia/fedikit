@@ -19,6 +19,9 @@ The rough roadmap is to implement the following features out of the box:
 - Special touch for interoperability with Mastodon and few other
   popular fediverse software
 
+Currently this project in general is not well documented, but you can
+find some examples in the `examples/` directory.
+
 .. _Activity Vocabulary: https://www.w3.org/TR/activitystreams-vocabulary/
 .. _HTTP Signatures: https://tools.ietf.org/html/draft-cavage-http-signatures-12
 .. _ActivityPub: https://www.w3.org/TR/activitypub/
