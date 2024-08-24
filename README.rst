@@ -1,3 +1,12 @@
+.. attention::
+
+   This project is archived, because Fedify_ succeeded this project.
+   It is a prototype of Fedify, and many ideas are reused in Fedify even
+   though the code is not (since Fedify is not written in Python, but in
+   TypeScript).
+
+.. _Fedify: https://fedify.dev/
+
 FediKit: A Pythonic interface to the fediverse
 ==============================================
 
